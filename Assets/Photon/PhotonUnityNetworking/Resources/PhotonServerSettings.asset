@@ -47,6 +47,7 @@ MonoBehaviour:
   - RPC_UpdateImageName
   - RPC_waitingForResult
   - RPC_SendThisToGameManager
+  - RPC_StoreRandomOption
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

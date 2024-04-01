@@ -22,7 +22,6 @@ public class OrbGameUI : MonoBehaviour
         
     }
 
-
     public void SetOrbStats(OrbDetails details)
     {
         Orb_name.SetText(details.id);
@@ -30,7 +29,6 @@ public class OrbGameUI : MonoBehaviour
         Torrent_num.SetText(details.Torrent.ToString());
         Blaze_num.SetText(details.Blaze.ToString());
     }
-
    
 
 }

@@ -17,6 +17,10 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] OrbGameUI gameUI;
 
     OrbDetails OrbDetails;
+    public int TerraValue { get { return OrbDetails.Terra; } }
+    public int TorrentValue { get { return OrbDetails.Torrent; } }
+    public int BlazeValue { get { return OrbDetails.Blaze; } }
+
     public OrbDetails getOrbDetails {  get { return OrbDetails; } }
 
     private void Awake()

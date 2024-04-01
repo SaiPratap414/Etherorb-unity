@@ -5,13 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
 [Serializable]
 public class PlayTrun
 {
+    // 1 = Terra , 2 = Torrent, 3 = Blaze  
     public int playerA;
     public int playerB;
 
@@ -20,14 +20,26 @@ public class PlayTrun
         playerA = 0;
         playerB = 0;
     }
-    public static bool operator ==(PlayTrun p1, PlayTrun p2)
+    public bool isSameTurn()
     {
-        return p1.playerA == p2.playerA && p1.playerB == p2.playerB;
+        return (playerA == playerB);
     }
-    public static bool operator !=(PlayTrun p1, PlayTrun p2)
+    /// <summary>
+    /// Determines The Winner
+    /// </summary>
+    /// <returns> 1 if PlayerA Won and 2 if PlayerB Won</returns>
+    public int GetWhoWon()
     {
-        return p1.playerA != p2.playerA && p1.playerB != p2.playerB;
+        if (playerA == 1 & playerB == 2)
+            return 1;
+        else if (playerA == 2 & playerB == 3)
+            return 1;
+        else if (playerA == 3 & playerB == 1)
+            return 1;
+        else 
+            return 2; // Player B Won.(meaning PlayerA lost)
     }
+
 }
 
 [Serializable]
@@ -77,6 +89,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject roundHistoryPlayerB;
     [SerializeField] GameObject lastPlayUiPrefab;
     [SerializeField] TMP_Text roundNumText;
+    [SerializeField] TMP_Text headingText;
     [SerializeField] GameObject GameOverPanel;
     [SerializeField] GameObject GameClosePanel;
     [SerializeField] GameObject VictoryPanel;
@@ -86,6 +99,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_Text EndPanelHeader;
     [SerializeField] Menu LoadingScreen;
 
+    [SerializeField] Sprite WonSprite;
+    [SerializeField] Sprite LostSprite;
 
 
     public Button[] GetOptionButtons { get { return Optionbuttons; } }
@@ -100,6 +115,7 @@ public class GameManager : MonoBehaviour
     [Header(" ")]
     public PlayTrun currentPlay = new PlayTrun();
     [SerializeField] int[] CurrentRoundScore = new int[2];
+    PlayTrun RandomPlay = new PlayTrun();
 
     public List<PlayTrun> previousTurns = new List<PlayTrun>();
 
@@ -110,7 +126,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] int playerAScore;
     [SerializeField] int playerBScore;
-    [SerializeField] Image hintImage;
     RoundTimer rTimer;
 
     PhotonView pv;
@@ -206,7 +221,7 @@ public class GameManager : MonoBehaviour
         ButtonsVisible(false);
 
         yield return new WaitForSeconds(1.2f);
-
+        GenerateRandomOption();
         if (PhotonNetwork.IsMasterClient)
             pv.RPC(nameof(RPC_CalculatePlay), RpcTarget.AllBuffered);
 
@@ -218,39 +233,109 @@ public class GameManager : MonoBehaviour
     [PunRPC]
     void RPC_CalculatePlay()
     {
-        PlayerPoints toCalculate = new PlayerPoints();
+        bool PlayerAWon = false;
         if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
         {
-            if (currentPlay.playerA == 0 && currentPlay.playerB == 0)
+            Debug.LogWarning("Calculate Play is being called");
+            if (currentPlay.playerA == 0)
             {
-                //headingText.text = " Both Players have not selected any Option ";
+                currentPlay.playerA = RandomPlay.playerA; // 1-3
             }
-            else
-            {
-                //headingText.text = players[0].NickName + " has not selected any Option"
-                if (currentPlay.playerA == 0)
-                {
-                }
 
-                //headingText.text = players[1].NickName + " has not selected any Option"
-                if (currentPlay.playerB == 0)
-                {
-                }
+            if (currentPlay.playerB == 0)
+            {
+                currentPlay.playerB = RandomPlay.playerB; // 1-3
             }
         }
 
-        playerAScore += toCalculate.playerAPoints;
-        playerBScore += toCalculate.playerBPoints;
+        if(currentPlay.isSameTurn())
+        {
+            if(currentPlay.playerA == 1)
+            {
+                // Check Terra Power Value
+                if(playerManager1.TerraValue > playerManager2.TerraValue)
+                {
+                    playerAScore += 1;
+                    Debug.LogWarning("Player A Won");
+                    PlayerAWon = true; 
+                }
+                else if(playerManager1.TerraValue < playerManager2.TerraValue)
+                {
+                    playerBScore += 1;
+                    Debug.LogWarning("Player B Won");
+                    PlayerAWon = false;
+                }
+                else
+                {
+                    Debug.LogWarning("Edge Case Both have same Value");
+                }
 
-        CurrentRoundScore[0] = toCalculate.playerAPoints;
-        CurrentRoundScore[1] = toCalculate.playerBPoints;
+            }
+            if (currentPlay.playerA == 2)
+            {
+                if (playerManager1.TorrentValue > playerManager2.TorrentValue)
+                {
+                    playerAScore += 1;
+                    Debug.LogWarning("Player A Won");
+                    PlayerAWon = true;
+                }
+                else if (playerManager1.TorrentValue < playerManager2.TorrentValue)
+                {
+                    playerBScore += 1;
+                    Debug.LogWarning("Player B Won");
+                    PlayerAWon = false;
+                }
+                else
+                {
+                    Debug.LogWarning("Edge Case Both have same Value");
+                }
+            }
+            if (currentPlay.playerA == 3)
+            {
+                if (playerManager1.BlazeValue > playerManager2.BlazeValue)
+                {
+                    playerAScore += 1;
+                    Debug.LogWarning("Player A Won");
+                    PlayerAWon = true;
+                }
+                else if (playerManager1.BlazeValue < playerManager2.BlazeValue)
+                {
+                    playerBScore += 1;
+                    Debug.LogWarning("Player B Won");
+                    PlayerAWon = false;
+                }
+                else
+                {
+                    Debug.LogWarning("Edge Case Both have same Value");
+                }
+            }
+        }
+        else
+        {
+            int whoWon = currentPlay.GetWhoWon();
+
+            if (whoWon == 1)
+            {
+                playerAScore += 1;
+                Debug.LogWarning("Player A Won");
+                PlayerAWon = true;
+            }
+            else if (whoWon == 2)
+            {
+                playerBScore += 1;
+                Debug.LogWarning("Player B Won");
+                PlayerAWon = false;
+            }
+        }
+        
 
         UScores[0].text = playerAScore.ToString("0");
         UScores[1].text = playerBScore.ToString("0");
 
-
-        //spawnlastPlayUi();
+        spawnlastPlayUi(PlayerAWon);
     }
+
+
 
     void ResetRound()
     {
@@ -272,7 +357,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.8f);
         rTimer.resetTimer();
         rTimer.setRoundBool(true);
-        //headingText.text = " Select Input ";
+        headingText.text = " Select Input ";
         ButtonsVisible(true);
         gameState = GameState.RoundWaitInput;
 
@@ -294,9 +379,8 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.Nothing;
         yield return new WaitForSeconds(2f);
-        hintImage.gameObject.SetActive(false);
         roundNum++;
-        if (roundNum <= maxRoundNum)
+        if(playerAScore < 3 && playerBScore < 3)
         {
             roundNumText.text = "Round " + roundNum;
             gameState = GameState.Roundstart;
@@ -321,6 +405,7 @@ public class GameManager : MonoBehaviour
 
     void CalculateWinLoss()
     {
+        // Condition not in use ............... But might come handy.
         if (playerAScore == playerBScore)
         {
             sendScoreForPlayers(5, 5);
@@ -328,6 +413,8 @@ public class GameManager : MonoBehaviour
             DrawPanel.SetActive(true);
             return;
         }
+        //
+
         bool playerAWon = playerAScore > playerBScore ? true : false;
         if (playerAWon)
         {
@@ -337,6 +424,7 @@ public class GameManager : MonoBehaviour
         {
             sendScoreForPlayers(2, 10);
         }
+
         if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
         {
             EndPanelScore.text = GetPlayerScore(1).ToString("0");
@@ -359,21 +447,14 @@ public class GameManager : MonoBehaviour
     }
 
 
-    void spawnlastPlayUi()
+    void spawnlastPlayUi(bool playerAWon)
     {
         GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayerA.transform);
-        uiA.transform.GetChild(0).GetComponent<Image>().sprite = getLastPlaySprite(currentPlay.playerA);
-        uiA.transform.GetChild(1).GetComponent<TMP_Text>().text = CurrentRoundScore[0] > 0 ? "+" + CurrentRoundScore[0].ToString("0") : CurrentRoundScore[0].ToString("0");
+        uiA.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? WonSprite : LostSprite;
         GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayerB.transform);
-        uiB.transform.GetChild(0).GetComponent<Image>().sprite = getLastPlaySprite(currentPlay.playerB);
-        uiB.transform.GetChild(1).GetComponent<TMP_Text>().text = CurrentRoundScore[1] > 0 ? "+" + CurrentRoundScore[1].ToString("0") : CurrentRoundScore[1].ToString("0");
+        uiB.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? LostSprite : WonSprite;
     }
 
-    Sprite getLastPlaySprite(int choice)
-    {
-        
-        return null;
-    }
 
 
     public void LeaveGame()
@@ -419,6 +500,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    void GenerateRandomOption()
+    {
+        if(!PhotonNetwork.IsMasterClient)
+            return;
+
+        int RandomA = UnityEngine.Random.Range(1, 4);
+        int RandomB = UnityEngine.Random.Range(1, 4);
+        Debug.Log("Random Generated: A-" + RandomA + "B-" + RandomB);
+        pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, RandomA, RandomB);
+
+    }
+
+    [PunRPC]
+    void RPC_StoreRandomOption(int RandomA, int RandomB)
+    {
+        RandomPlay.playerA = RandomA; 
+        RandomPlay.playerB = RandomB;
+    }
+
     void SyncPlayerData()
     {
         playerOrb1.SetOrbStats(playerManager1.getOrbDetails);
@@ -431,7 +532,6 @@ public class GameManager : MonoBehaviour
             isPlayer1R = true;
         if(playerNum == 2)
             isPlayer2R = true;
-
     }
 
 }

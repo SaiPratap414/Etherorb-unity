@@ -22,13 +22,11 @@ public class RoundTimer : MonoBehaviour
 
     PhotonView myPhotonView;
 
-    int previusTime = 0;
 
 
     void Start()
     {
         myPhotonView = GetComponent<PhotonView>();
-        //inRound = true;
         fullRoundTimer = maxRoundTime;
         timerToStart = maxRoundTime;
         if (PhotonNetwork.IsMasterClient)
