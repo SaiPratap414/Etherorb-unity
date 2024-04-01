@@ -34,9 +34,19 @@ public class PlayerManager : MonoBehaviour
         gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
         if (pv.IsMine)
         {
-            GameManager.instance.GetOptionButtons[0].onClick.AddListener(delegate { ChangeTheOption(1); });
-            GameManager.instance.GetOptionButtons[1].onClick.AddListener(delegate { ChangeTheOption(2); });
-            GameManager.instance.GetOptionButtons[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+            if(ActorNum == 1)
+            {
+                GameManager.instance.GetOptionButtonsPlayer1[0].onClick.AddListener(delegate { ChangeTheOption(1); });
+                GameManager.instance.GetOptionButtonsPlayer1[1].onClick.AddListener(delegate { ChangeTheOption(2); });
+                GameManager.instance.GetOptionButtonsPlayer1[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+            }
+            else if (ActorNum == 2)
+            {
+                GameManager.instance.GetOptionButtonsPlayer2[0].onClick.AddListener(delegate { ChangeTheOption(1); });
+                GameManager.instance.GetOptionButtonsPlayer2[1].onClick.AddListener(delegate { ChangeTheOption(2); });
+                GameManager.instance.GetOptionButtonsPlayer2[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+            }
+            
             OrbDetails = OrbManager.instance.GetSelectedOrb();
             pv.RPC(nameof(RPC_OrbStatSync), RpcTarget.OthersBuffered, OrbDetails.id, OrbDetails.image, OrbDetails.Terra, OrbDetails.Torrent, OrbDetails.Blaze);
             pv.RPC(nameof(RPC_SendThisToGameManager), RpcTarget.All, ActorNum);

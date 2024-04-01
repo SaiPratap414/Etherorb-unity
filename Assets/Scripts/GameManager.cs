@@ -38,6 +38,8 @@ public class PlayTrun
             return 1;
         else 
             return 2; // Player B Won.(meaning PlayerA lost)
+
+        
     }
 
 }
@@ -84,12 +86,14 @@ public class GameManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] TMP_Text[] UNames = new TMP_Text[2];
     [SerializeField] TMP_Text[] UScores = new TMP_Text[2];
-    [SerializeField] Button[] Optionbuttons = new Button[3];
+    [Tooltip("In the Order of Terra Torrent Blaze")]
+    [SerializeField] Button[] OptionbuttonsPlayer1 = new Button[3];
+    [Tooltip("In the Order of Terra Torrent Blaze")]
+    [SerializeField] Button[] OptionbuttonsPlayer2 = new Button[3];
     [SerializeField] GameObject roundHistoryPlayerA;
     [SerializeField] GameObject roundHistoryPlayerB;
     [SerializeField] GameObject lastPlayUiPrefab;
     [SerializeField] TMP_Text roundNumText;
-    [SerializeField] TMP_Text headingText;
     [SerializeField] GameObject GameOverPanel;
     [SerializeField] GameObject GameClosePanel;
     [SerializeField] GameObject VictoryPanel;
@@ -99,11 +103,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_Text EndPanelHeader;
     [SerializeField] Menu LoadingScreen;
 
+    [Header("")]
+    [SerializeField] TMP_Text AnnouncerHeader;
+    [SerializeField] TMP_Text AnnouncerDesc;
+
     [SerializeField] Sprite WonSprite;
     [SerializeField] Sprite LostSprite;
 
-
-    public Button[] GetOptionButtons { get { return Optionbuttons; } }
+    
+    public Button[] GetOptionButtonsPlayer1 { get { return OptionbuttonsPlayer1; } }
+    public Button[] GetOptionButtonsPlayer2 { get { return OptionbuttonsPlayer2; } }
 
     public Player[] players = null;
     public PlayerManager playerManager1 = null;
@@ -218,7 +227,7 @@ public class GameManager : MonoBehaviour
     IEnumerator CalculatePlay()
     {
         gameState = GameState.Nothing;
-        ButtonsVisible(false);
+        ButtonsEnable(false);
 
         yield return new WaitForSeconds(1.2f);
         GenerateRandomOption();
@@ -327,11 +336,13 @@ public class GameManager : MonoBehaviour
                 PlayerAWon = false;
             }
         }
-        
 
-        UScores[0].text = playerAScore.ToString("0");
-        UScores[1].text = playerBScore.ToString("0");
 
+        UScores[0].text = playerAScore.ToString("00");
+        UScores[1].text = playerBScore.ToString("00");
+
+        SetAnnouncerHeader(PlayerAWon);
+        AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
         spawnlastPlayUi(PlayerAWon);
     }
 
@@ -357,8 +368,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.8f);
         rTimer.resetTimer();
         rTimer.setRoundBool(true);
-        headingText.text = " Select Input ";
-        ButtonsVisible(true);
+        AnnouncerDesc.text = " Select Input ";
+        ButtonsEnable(true);
         gameState = GameState.RoundWaitInput;
 
     }
@@ -439,11 +450,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void ButtonsVisible(bool isVisibl)
+    void ButtonsEnable(bool isVisibl)
     {
-        Optionbuttons[0].gameObject.SetActive(isVisibl);
-        Optionbuttons[1].gameObject.SetActive(isVisibl);
-        Optionbuttons[2].gameObject.SetActive(isVisibl);
+        OptionbuttonsPlayer1[0].enabled = isVisibl;
+        OptionbuttonsPlayer1[1].enabled = isVisibl;
+        OptionbuttonsPlayer1[2].enabled = isVisibl;
+
+        OptionbuttonsPlayer2[0].enabled = isVisibl;
+        OptionbuttonsPlayer2[1].enabled = isVisibl;
+        OptionbuttonsPlayer2[2].enabled = isVisibl;
     }
 
 
@@ -532,6 +547,27 @@ public class GameManager : MonoBehaviour
             isPlayer1R = true;
         if(playerNum == 2)
             isPlayer2R = true;
+    }
+
+    string GenerateAnnouncerDescString(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    {
+        (1, 2) or (2, 1) => "<color=#83C878>Terra</color> beats <color=#5189BD>Torrent</color>",
+        (2, 3) or (3, 2) => "<color=#5189BD>Torrent</color> beats <color=#EE8868>Blaze</color>",
+        (3, 1) or (1, 3) => "<color=#EE8868>Blaze</color> beats <color=#83C878>Terra</color>",
+        _ => "TIE",
+    };
+
+    void SetAnnouncerHeader(bool PlayerAWon)
+    {
+        if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        {
+            AnnouncerHeader.text = PlayerAWon ? "YOU WON" : "YOU LOSE";
+        }
+        else if(PhotonNetwork.LocalPlayer.ActorNumber == 2) // not writing else just to make sure.....
+        {
+            AnnouncerHeader.text = !PlayerAWon ? "YOU WON" : "YOU LOSE";
+        }
+
     }
 
 }

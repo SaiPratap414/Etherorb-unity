@@ -80,7 +80,7 @@ public class RoundTimer : MonoBehaviour
         {
             fullRoundTimer -= Time.deltaTime;
             timerToStart -= fullRoundTimer;
-            TimerTxt.text = fullRoundTimer.ToString("0");
+            TimerTxt.text = fullRoundTimer.ToString("00");
 
             if (fullRoundTimer <= 0f)
             {
