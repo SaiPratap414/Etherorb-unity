@@ -14,8 +14,6 @@ public class MenuManager : MonoBehaviour
 
     [SerializeField] Menu[] menus;
 
-    [SerializeField] GameObject[] BackGrounds;
-
     [Header("Photon Variables")]
     public TimerScript countdownTimer;
     public TMP_Text nameText;
@@ -190,7 +188,14 @@ public class MenuManager : MonoBehaviour
         Email_IF.text = string.Empty;
     }
 
+    // this so that when we come to main menu the playfab connect refrence still stays...
+    public void LoginWithWalletAddress(string addr)
+    {
+        if (addr.Length < 3) return;
+        PlayfabConnet.instance.PlayFabLoginWithWalletId(addr);
+    }
 
+    // For dev Testing 
     public void LoginWithEmail()
     {
         string email = Email_IF.text;
