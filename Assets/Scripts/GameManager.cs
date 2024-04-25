@@ -86,6 +86,9 @@ public class GameManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] TMP_Text[] UNames = new TMP_Text[2];
     [SerializeField] TMP_Text[] UScores = new TMP_Text[2];
+
+    [SerializeField] string[] animationStrings = new string[4];
+
     [Tooltip("In the Order of Terra Torrent Blaze")]
     [SerializeField] Button[] OptionbuttonsPlayer1 = new Button[3];
     [Tooltip("In the Order of Terra Torrent Blaze")]
@@ -102,6 +105,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_Text EndPanelScore;
     [SerializeField] TMP_Text EndPanelHeader;
     [SerializeField] Menu LoadingScreen;
+    [SerializeField] Button homeButton;
 
     [Header("")]
     [SerializeField] TMP_Text AnnouncerHeader;
@@ -113,6 +117,7 @@ public class GameManager : MonoBehaviour
     
     public Button[] GetOptionButtonsPlayer1 { get { return OptionbuttonsPlayer1; } }
     public Button[] GetOptionButtonsPlayer2 { get { return OptionbuttonsPlayer2; } }
+    public string [] GetOrbAnimationName { get { return animationStrings; } }
 
     public Player[] players = null;
     public PlayerManager playerManager1 = null;
@@ -137,7 +142,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] int playerBScore;
     RoundTimer rTimer;
 
-    PhotonView pv;
+    [SerializeField] private Button ruleButton;
+    [SerializeField] private Button exitRulePanel;
+
+    [SerializeField] private GameObject rulePanel;
+
+    public PhotonView pv;
 
 
     private void Awake()
@@ -155,9 +165,14 @@ public class GameManager : MonoBehaviour
         UScores[0].text = "0";
         UScores[1].text = "0";
         gameState = GameState.Nothing;
+
+        homeButton.onClick.AddListener(LeaveGame);
     }
 
-
+    public void ShowOrHideRulePanel(bool show)
+    {
+        rulePanel.SetActive(show);
+    }
     private void Update()
     {
         if (!gameStarted && isPlayer1R && isPlayer2R)
@@ -372,6 +387,10 @@ public class GameManager : MonoBehaviour
         ButtonsEnable(true);
         gameState = GameState.RoundWaitInput;
 
+        AnnouncerHeader.text = string.Empty;
+        // idle image...
+        ResetOrbImages();
+        //ResetParticleGameObject();
     }
 
     void waitinForResults()
@@ -476,7 +495,6 @@ public class GameManager : MonoBehaviour
     {
         PhotonNetwork.LoadLevel(0);
     }
-
     public void GameFailedExit()
     {
         if (gameCompleted)
@@ -520,27 +538,48 @@ public class GameManager : MonoBehaviour
     {
         if(!PhotonNetwork.IsMasterClient)
             return;
-
-        int RandomA = UnityEngine.Random.Range(1, 4);
-        int RandomB = UnityEngine.Random.Range(1, 4);
-        Debug.Log("Random Generated: A-" + RandomA + "B-" + RandomB);
-        pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, RandomA, RandomB);
-
+        if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
+        {
+            int RandomA = UnityEngine.Random.Range(1, 4);
+            int RandomB = UnityEngine.Random.Range(1, 4);
+            Debug.Log("Random Generated: A-" + RandomA + "B-" + RandomB);
+            pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, RandomA, RandomB);
+        }
     }
 
     [PunRPC]
     void RPC_StoreRandomOption(int RandomA, int RandomB)
     {
+        
         RandomPlay.playerA = RandomA; 
         RandomPlay.playerB = RandomB;
+        playerOrb1.SetParticleGameObject(GetOrbAnimationName[RandomA]);
+        playerOrb2.SetParticleGameObject(GetOrbAnimationName[RandomB]);
     }
 
     void SyncPlayerData()
     {
-        playerOrb1.SetOrbStats(playerManager1.getOrbDetails);
-        playerOrb2.SetOrbStats(playerManager2.getOrbDetails);
+        try
+        {
+            playerOrb1.SetOrbStats(playerManager1.getOrbDetails);
+            playerOrb2.SetOrbStats(playerManager2.getOrbDetails);
+        }
+        catch(Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
     }
 
+    public void SetParticleGameObject(string animationName,int ActorNumber)
+    {
+        if (ActorNumber == 1) playerOrb1.SetParticleGameObject(animationName);
+        if (ActorNumber == 2) playerOrb2.SetParticleGameObject(animationName);
+    }
+    private void ResetOrbImages()
+    {
+        playerOrb1.SetParticleGameObject(GetOrbAnimationName[0]);
+        playerOrb2.SetParticleGameObject(GetOrbAnimationName[0]);
+    }
     public void SetPlayerReady(int playerNum)
     {
         if(playerNum == 1)

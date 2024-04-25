@@ -43,6 +43,7 @@ public class OrbManager : MonoBehaviour
 
     [SerializeField] List<Sprite> sprites = new List<Sprite>();
     [SerializeField] List<GameObject> UiObjects = new List<GameObject>();
+    [SerializeField] Sprite placeholder;
     int selectedIndex = 0;
 
     private void Awake()
@@ -103,11 +104,12 @@ public class OrbManager : MonoBehaviour
 
     Sprite GetSprite(string img64)
     {
-        Texture2D tex = new(1, 1);
-        byte[] imgbytes = Convert.FromBase64String(img64);
-        tex.LoadImage(imgbytes, true);
-        Sprite sprite2d = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        return sprite2d;
+        //Texture2D tex = new(1, 1);
+        //byte[] imgbytes = Convert.FromBase64String(img64);
+        //tex.LoadImage(imgbytes, true);
+        //Sprite sprite2d = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        //return sprite2d;
+        return placeholder;
     }
 
     public OrbDetails GetSelectedOrb()

@@ -4915,6 +4915,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orb_Shock_Blue
       objectReference: {fileID: 0}
+    - target: {fileID: 6741734988720072826, guid: 8519f328e7c40ce47a458c30cc8e07a1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5413,6 +5418,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Shield (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576217058202260952, guid: fb697acd4e3cc4a42bf8421f6efb54b1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2660781814693462941, guid: fb697acd4e3cc4a42bf8421f6efb54b1,
         type: 3}

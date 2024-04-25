@@ -53,7 +53,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
         if (!this.isTimerRunning) return;
 
         cachedTimeRemaining = TimeRemaining();
-        Text.SetText($"Game Found starts in {cachedTimeRemaining:n0} seconds");
+        Text.SetText($"Starts in {cachedTimeRemaining:n0} seconds");
 
         if (cachedTimeRemaining > 0.0f) return;
 
@@ -63,6 +63,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
 
     private void OnTimerRuns()
     {
+        MenuManager.instance.SetMatchFoundText("MATCH FOUND");
         this.isTimerRunning = true;
     }
 
@@ -119,7 +120,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
         startTimestamp = PhotonNetwork.ServerTimestamp;
 
         object startTimeFromProps;
-        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(CountdownStartTime, out startTimeFromProps))
+        if (PhotonNetwork.CurrentRoom !=null &&  PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(CountdownStartTime, out startTimeFromProps))
         {
             Debug.Log(startTimeFromProps);
             startTimestamp = (int)startTimeFromProps;

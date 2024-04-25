@@ -5062,6 +5062,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orb_Nature
       objectReference: {fileID: 0}
+    - target: {fileID: 9053295584273317513, guid: 7340a259058c4954c90ae731f9fe364b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9053295584273317514, guid: 7340a259058c4954c90ae731f9fe364b,
         type: 3}
       propertyPath: m_LocalScale.x

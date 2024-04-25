@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class MenuManager : MonoBehaviour
     public GameObject findingMatchPanel;
     public GameObject matchFoundPanel;
     [SerializeField] TMP_Text timerCounter;
+    [SerializeField] TMP_Text matchFoundText;
 
     [Header("LoginPanel")]
     [SerializeField] GameObject menuPanel;
@@ -38,6 +40,10 @@ public class MenuManager : MonoBehaviour
     [Header("Orb UI ")]
     [SerializeField] GameObject orbPrefab;
     [SerializeField] Transform content;
+
+    [SerializeField] Button devLoginButton;
+    [SerializeField] GameObject connectButtonPanel;
+    [SerializeField] GameObject devLoginPanel;
 
     private string nameKey = "displayName";
 
@@ -60,7 +66,6 @@ public class MenuManager : MonoBehaviour
 
         }
     }
-
     private void Start()
     {
         //if (PlayerPrefs.HasKey(nameKey))
@@ -170,6 +175,7 @@ public class MenuManager : MonoBehaviour
         if (scene.buildIndex == 0)
         {
             //PlayFabManager
+            SetMatchFoundText("FINDING MATCH");
         }
         if (scene.buildIndex == 1)
         {
@@ -188,6 +194,11 @@ public class MenuManager : MonoBehaviour
         Email_IF.text = string.Empty;
     }
 
+    public void SetMatchFoundText(string textValue)
+    {
+        matchFoundText.text = textValue;
+    }
+
     // this so that when we come to main menu the playfab connect refrence still stays...
     public void LoginWithWalletAddress(string addr)
     {
@@ -204,6 +215,12 @@ public class MenuManager : MonoBehaviour
         PlayfabConnet.instance.PlayFabLoginWithWalletId(Email_IF.text);
     }
 
+    public void DevLoginAction()
+    {
+        devLoginPanel.SetActive(true);
+        connectButtonPanel.SetActive(false);
+
+    }    
 
     #region OrbSpawning Ui
 

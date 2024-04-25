@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Menu : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class Menu : MonoBehaviour
     public GameObject GameLogo;
     public float rotateSpeed;
     private bool startRotating;
-
+    [SerializeField] private TextMeshProUGUI loadText;
 
     private void OnEnable()
     {
@@ -19,6 +20,7 @@ public class Menu : MonoBehaviour
     private void OnDisable()
     {
         startRotating = false;
+        StopAllCoroutines();
         if (isLoading)
             GameLogo.transform.rotation = Quaternion.identity;
     }
@@ -31,18 +33,39 @@ public class Menu : MonoBehaviour
                 GameLogo.transform.localRotation *= Quaternion.Euler(0, 0, rotateSpeed * Time.deltaTime);
             }
         }
+    }
 
+    IEnumerator ShowLoadingText()
+    {
+        while(startRotating && loadText != null)
+        {
+            loadText.text = "Loading.";
+            yield return new WaitForSeconds(0.3f);
+            loadText.text = "Loading..";
+            yield return new WaitForSeconds(0.3f);
+            loadText.text = "Loading...";
+            yield return new WaitForSeconds(0.3f);
+            
+        }
     }
 
     public void Open()
     {
         open = true;
         gameObject.SetActive(true);
+        StartCoroutine(ShowLoadingText());
     }
 
     public void Close()
     {
-        open = false;
-        gameObject.SetActive(false);
+        try
+        {
+            open = false;
+            gameObject.SetActive(false);
+        }
+        catch(System.Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
     }
 }
