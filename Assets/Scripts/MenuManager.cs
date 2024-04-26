@@ -18,14 +18,14 @@ public class MenuManager : MonoBehaviour
     [Header("Photon Variables")]
     public TimerScript countdownTimer;
     public TMP_Text nameText;
-    public GameObject StartMatching_btn;
-    public GameObject StopMatching_btn;
 
     [Header("MatchMaking")]
     public GameObject findingMatchPanel;
     public GameObject matchFoundPanel;
     [SerializeField] TMP_Text timerCounter;
     [SerializeField] TMP_Text matchFoundText;
+    [SerializeField] Image matchFoundImage;
+    [SerializeField] GameObject stopMatch;
 
     [Header("LoginPanel")]
     [SerializeField] GameObject menuPanel;
@@ -66,6 +66,7 @@ public class MenuManager : MonoBehaviour
 
         }
     }
+
     private void Start()
     {
         //if (PlayerPrefs.HasKey(nameKey))
@@ -175,7 +176,7 @@ public class MenuManager : MonoBehaviour
         if (scene.buildIndex == 0)
         {
             //PlayFabManager
-            SetMatchFoundText("FINDING MATCH");
+            SetMatchFoundProperties("FINDING MATCH",Color.black,true);
         }
         if (scene.buildIndex == 1)
         {
@@ -194,9 +195,13 @@ public class MenuManager : MonoBehaviour
         Email_IF.text = string.Empty;
     }
 
-    public void SetMatchFoundText(string textValue)
+    public void SetMatchFoundProperties(string textValue,Color bgColor,bool showStopMatch)
     {
+        menus[3].GetComponent<Menu>().enabled = showStopMatch;
         matchFoundText.text = textValue;
+        matchFoundImage.color = bgColor;
+        matchFoundText.color = bgColor == Color.black ? Color.white : Color.black;
+        stopMatch.SetActive(showStopMatch);
     }
 
     // this so that when we come to main menu the playfab connect refrence still stays...
@@ -237,7 +242,7 @@ public class MenuManager : MonoBehaviour
     //Sets the name in the PlayeFab (Button Func)
     public void SetNewUserName()
     {
-        if (!string.IsNullOrEmpty(name_IF.text) && name_IF.text.Length > 3)
+        if (!string.IsNullOrEmpty(name_IF.text) && name_IF.text.Length > 2)
         {
             PlayfabConnet.instance.SetPlayerName(name_IF.text);
             nameText.text = name_IF.text;

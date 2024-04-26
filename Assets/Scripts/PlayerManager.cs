@@ -39,12 +39,21 @@ public class PlayerManager : MonoBehaviour
                 GameManager.instance.GetOptionButtonsPlayer1[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer1[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer1[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+
+                foreach (var item in GameManager.instance.GetOptionButtonsPlayer2)
+                {
+                    item.GetComponent<ButtonUtility>().enabled = false;
+                }
             }
             else if (ActorNum == 2)
             {
                 GameManager.instance.GetOptionButtonsPlayer2[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer2[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer2[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+                foreach (var item in GameManager.instance.GetOptionButtonsPlayer1)
+                {
+                    item.GetComponent<ButtonUtility>().enabled = false;
+                }
             }
             
             OrbDetails = OrbManager.instance.GetSelectedOrb();

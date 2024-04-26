@@ -12,6 +12,7 @@ public class Menu : MonoBehaviour
     public float rotateSpeed;
     private bool startRotating;
     [SerializeField] private TextMeshProUGUI loadText;
+    [SerializeField] private string msgForLoading;
 
     private void OnEnable()
     {
@@ -39,15 +40,21 @@ public class Menu : MonoBehaviour
     {
         while(startRotating && loadText != null)
         {
-            loadText.text = "Loading.";
+            loadText.text = msgForLoading + ".";
             yield return new WaitForSeconds(0.3f);
-            loadText.text = "Loading..";
+            loadText.text = msgForLoading+ "..";
             yield return new WaitForSeconds(0.3f);
-            loadText.text = "Loading...";
+            loadText.text = msgForLoading+"...";
             yield return new WaitForSeconds(0.3f);
             
         }
     }
+
+    public void StartLoadingText()
+    {
+        StartCoroutine(ShowLoadingText());
+    }
+
 
     public void Open()
     {

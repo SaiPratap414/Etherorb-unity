@@ -63,7 +63,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
 
     private void OnTimerRuns()
     {
-        MenuManager.instance.SetMatchFoundText("MATCH FOUND");
+        MenuManager.instance.SetMatchFoundProperties("MATCH FOUND",Color.white,false);
         this.isTimerRunning = true;
     }
 

@@ -61,7 +61,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     void ConnectToPhoton()
     {
-        MenuManager.instance.OpenMenuId(2);
+        //MenuManager.instance.OpenMenuId(2);
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.ConnectUsingSettings();
     }
@@ -130,8 +130,8 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("You have connected to a Photon Lobby");
-        MenuManager.instance.OpenMenuId(2);
         OrbManager.instance.GetAllOrbDetails();
+        MenuManager.instance.OpenMenuId(2);
     }
 
 

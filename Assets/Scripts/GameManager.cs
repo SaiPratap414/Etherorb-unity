@@ -90,9 +90,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] string[] animationStrings = new string[4];
 
     [Tooltip("In the Order of Terra Torrent Blaze")]
-    [SerializeField] Button[] OptionbuttonsPlayer1 = new Button[3];
+    [SerializeField] Button[] OptionbuttonsPlayer1 = new Button[4];
     [Tooltip("In the Order of Terra Torrent Blaze")]
-    [SerializeField] Button[] OptionbuttonsPlayer2 = new Button[3];
+    [SerializeField] Button[] OptionbuttonsPlayer2 = new Button[4];
     [SerializeField] GameObject roundHistoryPlayerA;
     [SerializeField] GameObject roundHistoryPlayerB;
     [SerializeField] GameObject lastPlayUiPrefab;
