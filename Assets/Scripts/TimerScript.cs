@@ -53,7 +53,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
         if (!this.isTimerRunning) return;
 
         cachedTimeRemaining = TimeRemaining();
-        Text.SetText($"Starts in {cachedTimeRemaining:n0} seconds");
+        Text.SetText($"STARTS IN {cachedTimeRemaining:n0} SECS");
 
         if (cachedTimeRemaining > 0.0f) return;
 

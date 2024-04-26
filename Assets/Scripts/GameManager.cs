@@ -244,12 +244,12 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
         ButtonsEnable(false);
 
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(0.5f);
         GenerateRandomOption();
         if (PhotonNetwork.IsMasterClient)
             pv.RPC(nameof(RPC_CalculatePlay), RpcTarget.AllBuffered);
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         ResetRound();
 
     }
@@ -408,7 +408,7 @@ public class GameManager : MonoBehaviour
     IEnumerator ImwaitinForResults()
     {
         gameState = GameState.Nothing;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         roundNum++;
         if(playerAScore < 3 && playerBScore < 3)
         {

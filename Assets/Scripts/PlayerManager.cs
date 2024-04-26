@@ -39,6 +39,7 @@ public class PlayerManager : MonoBehaviour
                 GameManager.instance.GetOptionButtonsPlayer1[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer1[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer1[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+                GameManager.instance.GetOptionButtonsPlayer1[3].onClick.AddListener(delegate { OnClickReady(); });
 
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer2)
                 {
@@ -50,6 +51,7 @@ public class PlayerManager : MonoBehaviour
                 GameManager.instance.GetOptionButtonsPlayer2[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer2[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer2[2].onClick.AddListener(delegate { ChangeTheOption(3); });
+                GameManager.instance.GetOptionButtonsPlayer2[3].onClick.AddListener(delegate { OnClickReady(); });
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer1)
                 {
                     item.GetComponent<ButtonUtility>().enabled = false;
@@ -79,7 +81,16 @@ public class PlayerManager : MonoBehaviour
     }
     void ChangeTheOption(int num)
     {
-        pv.RPC(nameof(RPC_ChangeTheOption), RpcTarget.All, num);
+        currentSelectedOptions = num;
+        GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
+    }
+
+    private void OnClickReady()
+    {
+        if (currentSelectedOptions > 0)
+        {
+            pv.RPC(nameof(RPC_ChangeTheOption), RpcTarget.All, currentSelectedOptions);
+        }
     }
 
     [PunRPC]
@@ -99,7 +110,6 @@ public class PlayerManager : MonoBehaviour
         GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
         //GameManager.instance.ShowParticleGameObjects(num, pv.OwnerActorNr);
         GameManager.instance.InputChoise(num, pv.OwnerActorNr);
-        currentSelectedOptions = num;
     }
 
 
