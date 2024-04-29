@@ -67,6 +67,8 @@ public class PlayfabConnet : MonoBehaviour
         // Save Login Id
         PlayerPrefs.SetString("LoginId", walletAdd);
 
+        //UserPrefsManager.GetHasLogedIn = 1;
+
         GetPlayerData();
         //Check if it's first login
         //if (result.NewlyCreated)
@@ -85,6 +87,7 @@ public class PlayfabConnet : MonoBehaviour
     private void OnLoginFailed(PlayFabError error)
     {
         Debug.LogError("Login Failed: " + error.ErrorMessage);
+        //UserPrefsManager.GetHasLogedIn = 0;
     }
 
     public void OnLogOut()
@@ -92,6 +95,7 @@ public class PlayfabConnet : MonoBehaviour
         PlayFabClientAPI.ForgetAllCredentials();
         hasLogedIn = false;
         playerName = null;
+        //UserPrefsManager.GetHasLogedIn = 0;
     }
 
     #endregion

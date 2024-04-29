@@ -82,8 +82,18 @@ public class MenuManager : MonoBehaviour
         if (PlayfabConnet.instance.GetHasLogedIn)
         {
             nameText.text = PlayfabConnet.instance.PlayerName;
+            OrbManager.instance.GetAllOrbDetails();
+            OpenMenuId(2);
         }
-        OpenMenuId(0);
+        else if (UserPrefsManager.UserName !=string.Empty)
+        {
+            Email_IF.text = UserPrefsManager.UserName;
+            LoginWithEmail();
+        }
+        else
+        {
+            OpenMenuId(0);
+        }
     }
 
     private void Update()
@@ -216,6 +226,8 @@ public class MenuManager : MonoBehaviour
     {
         string email = Email_IF.text;
         if(email.Length < 3) return;
+
+        UserPrefsManager.UserName = email;
         Debug.Log("Logged In with Email:- " + email);
         PlayfabConnet.instance.PlayFabLoginWithWalletId(Email_IF.text);
     }

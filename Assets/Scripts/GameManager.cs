@@ -236,6 +236,12 @@ public class GameManager : MonoBehaviour
     {
         if (ActorNumber == 1) currentPlay.playerA = choice;
         if (ActorNumber == 2) currentPlay.playerB = choice;
+
+        if(currentPlay.playerA !=0 && currentPlay.playerB !=0)
+        {
+            SetParticleGameObject(GetOrbAnimationName[currentPlay.playerA], 1);
+            SetParticleGameObject(GetOrbAnimationName[currentPlay.playerB], 2);
+        }
     }
 
 

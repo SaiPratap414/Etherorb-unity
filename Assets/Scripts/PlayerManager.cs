@@ -94,6 +94,7 @@ public class PlayerManager : MonoBehaviour
     void ChangeTheOption(int num)
     {
         currentSelectedOptions = num;
+        //GameManager.instance.SetSelectedStatesForButton(num,pv.OwnerActorNr);
         GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
     }
 
@@ -119,7 +120,7 @@ public class PlayerManager : MonoBehaviour
     void RPC_ChangeTheOption(int num)
     {
 
-        GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
+        //GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
         //GameManager.instance.ShowParticleGameObjects(num, pv.OwnerActorNr);
         GameManager.instance.InputChoise(num, pv.OwnerActorNr);
     }
