@@ -12,15 +12,14 @@ public class OrbGameUI : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] Image Orb_image;
     [SerializeField] TMP_Text Orb_name;
+
     [SerializeField] TMP_Text Terra_num;
     [SerializeField] TMP_Text Torrent_num;
     [SerializeField] TMP_Text Blaze_num;
 
-    [SerializeField] ParticleSystem[] orbParticleSystem = new ParticleSystem[4];
 
-    private int currentIndex = 0;
+    [SerializeField] private List<Transform> scaleSwapObjects = new List<Transform>();
 
-    
     private void Start()
     {
         //StartCoroutine(Test());
@@ -37,6 +36,15 @@ public class OrbGameUI : MonoBehaviour
     public void SetParticleGameObject(string animation)
     {
         animator.Play(animation);
+    }
+
+    public void ReverseScale()
+    {
+        foreach (var item in scaleSwapObjects)
+        {
+            item.localScale = new Vector3(-1, 1, 1);
+        }
+        transform.localScale = new Vector3(-1, 1, 1);
     }
 
     IEnumerator Test()

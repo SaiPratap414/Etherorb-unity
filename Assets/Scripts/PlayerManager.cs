@@ -32,6 +32,7 @@ public class PlayerManager : MonoBehaviour
     private void Start()
     {
         gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
+
         if (pv.IsMine)
         {
             if(ActorNum == 1)
@@ -48,10 +49,21 @@ public class PlayerManager : MonoBehaviour
             }
             else if (ActorNum == 2)
             {
+                //align object 2 left and object 1 to right
+                Vector3 player1Pos = GameManager.instance.GetPlayerOrb1.transform.position;
+                Vector3 player2Pos = GameManager.instance.GetPlayerOrb2.transform.position;
+
+                GameManager.instance.GetPlayerOrb1.transform.position = player2Pos;
+                GameManager.instance.GetPlayerOrb2.transform.position = player1Pos;
+
+                GameManager.instance.GetPlayerOrb1.ReverseScale();
+                GameManager.instance.GetPlayerOrb2.ReverseScale();
+
                 GameManager.instance.GetOptionButtonsPlayer2[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer2[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer2[2].onClick.AddListener(delegate { ChangeTheOption(3); });
                 GameManager.instance.GetOptionButtonsPlayer2[3].onClick.AddListener(delegate { OnClickReady(); });
+
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer1)
                 {
                     item.GetComponent<ButtonUtility>().enabled = false;
