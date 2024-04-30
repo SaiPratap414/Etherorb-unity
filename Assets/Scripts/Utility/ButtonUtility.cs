@@ -29,9 +29,30 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
     [SerializeField] private bool changeSprite;
     [SerializeField] private bool hasClickState;
 
+    public bool isSelected = false;
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if(hasClickState)
+        {
+            SelectedStateAction();
+        }
+    }
+
+    public void DeSelectState()
+    {
+        isSelected = false;
+        ExitState();
+    }
+
+    public void SelectedStateAction()
+    {
+        isSelected = true;
+        if (changeSprite)
+        {
+            image.sprite = hoverSprite;
+        }
+        else
         {
             image.color = clickImageColor;
             text.color = clickTextColor;
@@ -53,6 +74,14 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
+        if (!isSelected)
+        {
+            ExitState();
+        }
+    }
+
+    private void ExitState()
+    {
         if (changeSprite)
         {
             image.sprite = normalSprite;
@@ -60,6 +89,7 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
         else
         {
             image.color = normalImageColor;
+            if(text !=null)
             text.color = normalTextColor;
         }
     }

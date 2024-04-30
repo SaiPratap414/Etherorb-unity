@@ -429,7 +429,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.000061035156, y: 200}
-  m_SizeDelta: {x: 140, y: 136}
+  m_SizeDelta: {x: 138, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &180067770
 MonoBehaviour:
@@ -1796,7 +1796,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.000061035156, y: 0}
-  m_SizeDelta: {x: 375, y: 96}
+  m_SizeDelta: {x: 410, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &671182554
 MonoBehaviour:
@@ -1833,8 +1833,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 2e7abf1980001ad409d3b788f26302a5, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2398,6 +2398,7 @@ MonoBehaviour:
   normalSprite: {fileID: 0}
   changeSprite: 0
   hasClickState: 0
+  isSelected: 0
 --- !u!1 &863048299
 GameObject:
   m_ObjectHideFlags: 0
@@ -2558,8 +2559,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 38
-  m_fontSizeBase: 38
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3307,6 +3308,7 @@ MonoBehaviour:
   normalSprite: {fileID: 0}
   changeSprite: 0
   hasClickState: 0
+  isSelected: 0
 --- !u!1 &1105839563
 GameObject:
   m_ObjectHideFlags: 0
@@ -5476,6 +5478,7 @@ MonoBehaviour:
   normalSprite: {fileID: 0}
   changeSprite: 0
   hasClickState: 0
+  isSelected: 0
 --- !u!1 &1693168376
 GameObject:
   m_ObjectHideFlags: 0

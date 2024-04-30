@@ -93,8 +93,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] Button[] OptionbuttonsPlayer1 = new Button[4];
     [Tooltip("In the Order of Terra Torrent Blaze")]
     [SerializeField] Button[] OptionbuttonsPlayer2 = new Button[4];
-    [SerializeField] GameObject roundHistoryPlayerA;
-    [SerializeField] GameObject roundHistoryPlayerB;
+    [SerializeField] GameObject roundHistoryPlayer;
+    [SerializeField] GameObject elementGameobjectPlayerA;
+    [SerializeField] GameObject elementGameobjectPlayerB;
+    [SerializeField] GameObject staticUIPanel;
     [SerializeField] GameObject lastPlayUiPrefab;
     [SerializeField] TMP_Text roundNumText;
     [SerializeField] GameObject GameOverPanel;
@@ -249,7 +251,9 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.Nothing;
         ButtonsEnable(false);
-
+        ShowOrDeSelectButtons(GetOptionButtonsPlayer1,false);
+        ShowOrDeSelectButtons(GetOptionButtonsPlayer2, false);
+        ClearUIForResult(false);
         yield return new WaitForSeconds(0.5f);
         GenerateRandomOption();
         if (PhotonNetwork.IsMasterClient)
@@ -264,6 +268,7 @@ public class GameManager : MonoBehaviour
     void RPC_CalculatePlay()
     {
         bool PlayerAWon = false;
+        bool isDraw = false;
         if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
         {
             Debug.LogWarning("Calculate Play is being called");
@@ -298,6 +303,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Edge Case Both have same Value");
+                    isDraw = true;
                 }
 
             }
@@ -318,6 +324,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Edge Case Both have same Value");
+                    isDraw = true;
                 }
             }
             if (currentPlay.playerA == 3)
@@ -337,6 +344,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Edge Case Both have same Value");
+                    isDraw = true;
                 }
             }
         }
@@ -362,9 +370,9 @@ public class GameManager : MonoBehaviour
         UScores[0].text = playerAScore.ToString("00");
         UScores[1].text = playerBScore.ToString("00");
 
+        spawnlastPlayUi(PlayerAWon,isDraw);
         SetAnnouncerHeader(PlayerAWon);
         AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
-        spawnlastPlayUi(PlayerAWon);
     }
 
 
@@ -396,7 +404,10 @@ public class GameManager : MonoBehaviour
         AnnouncerHeader.text = string.Empty;
         // idle image...
         ResetOrbImages();
-        //ResetParticleGameObject();
+
+        ShowOrDeSelectButtons(GetOptionButtonsPlayer1);
+        ShowOrDeSelectButtons(GetOptionButtonsPlayer2);
+        ClearUIForResult(true);
     }
 
     void waitinForResults()
@@ -487,12 +498,20 @@ public class GameManager : MonoBehaviour
     }
 
 
-    void spawnlastPlayUi(bool playerAWon)
+    void spawnlastPlayUi(bool playerAWon,bool isDraw)
     {
-        GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayerA.transform);
-        uiA.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? WonSprite : LostSprite;
-        GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayerB.transform);
-        uiB.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? LostSprite : WonSprite;
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        {
+            GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
+            uiA.GetComponent<RoundUI>().SetUpRoundUI(playerAWon,isDraw);
+            //uiA.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? WonSprite : LostSprite;
+        }
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 2) // 1 is Player A
+        {
+            GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
+            //uiB.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? LostSprite : WonSprite;
+            uiB.GetComponent<RoundUI>().SetUpRoundUI(!playerAWon,isDraw);
+        }
     }
 
 
@@ -576,6 +595,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetSelectedStatesForButton(int index,int player)
+    {
+        if(player ==1)
+        {
+            ShowOrDeSelectButtons(GetOptionButtonsPlayer1);
+            GetOptionButtonsPlayer1[index - 1].GetComponent<ButtonUtility>().SelectedStateAction();
+        }
+        else
+        {
+            ShowOrDeSelectButtons(GetOptionButtonsPlayer2);
+            GetOptionButtonsPlayer2[index - 1].GetComponent<ButtonUtility>().SelectedStateAction();
+        }
+    }
+
     public void SetParticleGameObject(string animationName,int ActorNumber)
     {
         if (ActorNumber == 1) playerOrb1.SetParticleGameObject(animationName);
@@ -585,6 +618,25 @@ public class GameManager : MonoBehaviour
     {
         playerOrb1.SetParticleGameObject(GetOrbAnimationName[0]);
         playerOrb2.SetParticleGameObject(GetOrbAnimationName[0]);
+    }
+    private void ShowOrDeSelectButtons(Button[] buttons,bool show=true)
+    {
+        foreach (var item in buttons)
+        {
+            item.gameObject.SetActive(show);
+            item.GetComponent<ButtonUtility>().DeSelectState();
+        }
+    }
+    private void ClearUIForResult(bool show)
+    {
+        elementGameobjectPlayerA.SetActive(show);
+        elementGameobjectPlayerB.SetActive(show);
+        staticUIPanel.SetActive(show);
+        foreach (var item in UNames)
+        {
+            item.gameObject.SetActive(show);
+        }
+        
     }
     public void SetPlayerReady(int playerNum)
     {

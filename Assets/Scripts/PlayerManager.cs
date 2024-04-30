@@ -94,7 +94,7 @@ public class PlayerManager : MonoBehaviour
     void ChangeTheOption(int num)
     {
         currentSelectedOptions = num;
-        //GameManager.instance.SetSelectedStatesForButton(num,pv.OwnerActorNr);
+        GameManager.instance.SetSelectedStatesForButton(num,pv.OwnerActorNr);
         GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
     }
 
