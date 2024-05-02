@@ -1712,6 +1712,7 @@ GameObject:
   m_Component:
   - component: {fileID: 604391450}
   - component: {fileID: 604391451}
+  - component: {fileID: 604391452}
   m_Layer: 5
   m_Name: FindingMatch Panel
   m_TagString: Untagged
@@ -1759,6 +1760,19 @@ MonoBehaviour:
   rotateSpeed: 0
   loadText: {fileID: 878909805}
   msgForLoading: FINDING MATCH
+--- !u!114 &604391452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604391449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64a1c9c06b57742bb9171401bb081adb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 2046430543}
 --- !u!1 &671182552
 GameObject:
   m_ObjectHideFlags: 0
@@ -2219,10 +2233,10 @@ RectTransform:
   - {fileID: 692566178}
   m_Father: {fileID: 604391450}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 15, y: 0}
-  m_SizeDelta: {x: 910.5, y: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 75, y: 0}
+  m_SizeDelta: {x: 870, y: 870}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!1 &825133007
 GameObject:
@@ -4491,7 +4505,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -15, y: 0}
+  m_AnchoredPosition: {x: -100, y: 0}
   m_SizeDelta: {x: 910.5, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!1 &1564593587
@@ -6088,6 +6102,7 @@ GameObject:
   - component: {fileID: 2046430540}
   - component: {fileID: 2046430542}
   - component: {fileID: 2046430541}
+  - component: {fileID: 2046430543}
   m_Layer: 5
   m_Name: PlayerOrb
   m_TagString: Untagged
@@ -6112,7 +6127,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -100, y: 0}
-  m_SizeDelta: {x: 716.1, y: 715.4}
+  m_SizeDelta: {x: 1080, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2046430541
 MonoBehaviour:
@@ -6134,7 +6149,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: accbf3db031865843a77624aa55f7f7e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e5087d1c653ae43b9a0bbb6a2c204dd1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6152,6 +6167,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2046430539}
   m_CullTransparentMesh: 1
+--- !u!95 &2046430543
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2046430539}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8c5263b33225c4e79859e51ad6763835, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2062398416
 GameObject:
   m_ObjectHideFlags: 0

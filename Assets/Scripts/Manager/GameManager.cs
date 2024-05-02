@@ -99,6 +99,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject staticUIPanel;
     [SerializeField] GameObject lastPlayUiPrefab;
     [SerializeField] TMP_Text roundNumText;
+
+    [SerializeField] TextMeshProUGUI incrementScoreTextA;
+    [SerializeField] TextMeshProUGUI incrementScoreTextB;
+
     [SerializeField] GameObject GameOverPanel;
     [SerializeField] GameObject GameClosePanel;
     [SerializeField] GameObject VictoryPanel;
@@ -254,12 +258,12 @@ public class GameManager : MonoBehaviour
         ShowOrDeSelectButtons(GetOptionButtonsPlayer1,false);
         ShowOrDeSelectButtons(GetOptionButtonsPlayer2, false);
         ClearUIForResult(false);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.2f);
         GenerateRandomOption();
         if (PhotonNetwork.IsMasterClient)
             pv.RPC(nameof(RPC_CalculatePlay), RpcTarget.AllBuffered);
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(1f);
         ResetRound();
 
     }
@@ -371,7 +375,7 @@ public class GameManager : MonoBehaviour
         UScores[1].text = playerBScore.ToString("00");
 
         spawnlastPlayUi(PlayerAWon,isDraw);
-        SetAnnouncerHeader(PlayerAWon);
+        SetAnnouncerHeader(PlayerAWon,isDraw);
         AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
     }
 
@@ -504,6 +508,16 @@ public class GameManager : MonoBehaviour
         {
             GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
             uiA.GetComponent<RoundUI>().SetUpRoundUI(playerAWon,isDraw);
+            if(playerAWon)
+            {
+                incrementScoreTextA.gameObject.SetActive(playerAWon);
+                incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect();
+            }
+            else
+            {
+                incrementScoreTextB.gameObject.SetActive(!playerAWon);
+                incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect();
+            }
             //uiA.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? WonSprite : LostSprite;
         }
         if (PhotonNetwork.LocalPlayer.ActorNumber == 2) // 1 is Player A
@@ -511,7 +525,19 @@ public class GameManager : MonoBehaviour
             GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
             //uiB.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? LostSprite : WonSprite;
             uiB.GetComponent<RoundUI>().SetUpRoundUI(!playerAWon,isDraw);
+            if (!playerAWon)
+            {
+                incrementScoreTextB.gameObject.SetActive(!playerAWon);
+                incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect();
+            }
+            else
+            {
+                incrementScoreTextA.gameObject.SetActive(playerAWon);
+                incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect();
+            }
         }
+
+
     }
 
 
@@ -654,15 +680,19 @@ public class GameManager : MonoBehaviour
         _ => "TIE",
     };
 
-    void SetAnnouncerHeader(bool PlayerAWon)
+    void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {
         if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
         {
-            AnnouncerHeader.text = PlayerAWon ? "YOU WON" : "YOU LOSE";
+            
+            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect();
+            AnnouncerHeader.text = isDraw ? "ITS A TIE" : PlayerAWon ? "YOU WON" : "YOU LOSE";
         }
         else if(PhotonNetwork.LocalPlayer.ActorNumber == 2) // not writing else just to make sure.....
         {
-            AnnouncerHeader.text = !PlayerAWon ? "YOU WON" : "YOU LOSE";
+        
+            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect();
+            AnnouncerHeader.text = isDraw ? "ITS A TIE" : !PlayerAWon ? "YOU WON" : "YOU LOSE";
         }
 
     }

@@ -6,6 +6,9 @@ public class RoundUI : MonoBehaviour
     [SerializeField] private Image image;
     [SerializeField] private Sprite drawSprite;
 
+    [SerializeField] private Color redColor;
+    [SerializeField] private Color greenColor;
+
     public void SetUpRoundUI(bool won,bool isDraw=false)
     {
         if (isDraw)
@@ -14,7 +17,7 @@ public class RoundUI : MonoBehaviour
         }
         else
         {
-            image.color = won ? Color.green : Color.red;
+            image.color = won ? greenColor : redColor;
         }
     }
 }

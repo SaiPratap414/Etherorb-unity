@@ -51,6 +51,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   image: {fileID: 4806823374359762570}
   drawSprite: {fileID: 21300000, guid: 0cfa2d4d61a95ff4da7b6a21a98210d8, type: 3}
+  redColor: {r: 1, g: 0.5176471, b: 0.5176471, a: 1}
+  greenColor: {r: 0.57254905, g: 1, b: 0.37254903, a: 1}
 --- !u!1 &2354376555401471632
 GameObject:
   m_ObjectHideFlags: 0
