@@ -152,9 +152,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button exitRulePanel;
 
     [SerializeField] private GameObject rulePanel;
+    [SerializeField] private GameConfig gameConfig;
+
+    [SerializeField] private Animator zapAnimatorA;
+    [SerializeField] private Animator zapAnimatorB;
+
+    [SerializeField] private Animator impactAnimatorA;
+    [SerializeField] private Animator impactAnimatorB;
 
     public PhotonView pv;
 
+    private CardType cardWon;
+    private CardType cardLost;
+
+    private AudioManager audioManager;
 
     private void Awake()
     {
@@ -173,6 +184,10 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
 
         homeButton.onClick.AddListener(LeaveGame);
+    }
+    private void Start()
+    {
+        audioManager = AudioManager.Instance;
     }
 
     public void ShowOrHideRulePanel(bool show)
@@ -234,6 +249,7 @@ public class GameManager : MonoBehaviour
         if (currentPlay.playerA != 0 && currentPlay.playerB != 0)
         {
             gameState = GameState.RoundEnd;
+            audioManager.StopTimerSound();
             rTimer.StopTimer();
         }
     }
@@ -258,12 +274,13 @@ public class GameManager : MonoBehaviour
         ShowOrDeSelectButtons(GetOptionButtonsPlayer1,false);
         ShowOrDeSelectButtons(GetOptionButtonsPlayer2, false);
         ClearUIForResult(false);
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(0.5f);
+
         GenerateRandomOption();
         if (PhotonNetwork.IsMasterClient)
             pv.RPC(nameof(RPC_CalculatePlay), RpcTarget.AllBuffered);
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2.4f);
         ResetRound();
 
     }
@@ -374,12 +391,62 @@ public class GameManager : MonoBehaviour
         UScores[0].text = playerAScore.ToString("00");
         UScores[1].text = playerBScore.ToString("00");
 
-        spawnlastPlayUi(PlayerAWon,isDraw);
-        SetAnnouncerHeader(PlayerAWon,isDraw);
-        AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
+        SetCardWonAndLost(currentPlay);
+        StartCoroutine(GameResultSequence(PlayerAWon, isDraw));
     }
 
+    IEnumerator GameResultSequence(bool PlayerAWon, bool isDraw)
+    {
+        AnnouncerDesc.SetText(string.Empty);
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
+        {
+            if (PlayerAWon && !isDraw)
+            {
+                yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorA, impactAnimatorB,playerOrb2));
+            }
+            else if(!PlayerAWon && !isDraw)
+            {
+                yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorB, impactAnimatorA,playerOrb1));
+            }
+        }
 
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
+        {
+            if (PlayerAWon && !isDraw)
+            {
+                yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorA, impactAnimatorB,playerOrb2));
+            }
+            else if (!PlayerAWon && !isDraw)
+            {
+                yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorB, impactAnimatorA,playerOrb1));
+            }
+        }
+
+        spawnlastPlayUi(PlayerAWon, isDraw);
+        SetAnnouncerHeader(PlayerAWon, isDraw);
+        //AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
+        AnnouncerDesc.GetComponent<TextRevealEffect>().StartEffect(GenerateAnnouncerDescStringText(currentPlay));
+    }
+
+    private IEnumerator ExecuteAnimationSequence(Animator zap,Animator imapct, OrbGameUI orbGameUI)
+    {
+        zap.gameObject.SetActive(true);
+        zap.enabled = true;
+        WinVFXNames winVFX = gameConfig.winVFXNames.Find(x => x.type.Equals(cardWon));
+        zap.Play(winVFX.zapAnimationName);
+        yield return new WaitForSeconds(0.517f);
+        zap.enabled = false;
+        zap.gameObject.SetActive(false);
+
+        imapct.gameObject.SetActive(true);
+        imapct.enabled = true;
+        imapct.Play(winVFX.impactAnimationName);
+        LostAnimationName lostVFX = gameConfig.lostAnimationNames.Find(x => x.type.Equals(cardLost));
+        orbGameUI.SetParticleGameObject(lostVFX.lostAnimationName);
+        yield return new WaitForSeconds(0.517f);
+        imapct.enabled = false;
+        imapct.gameObject.SetActive(false);
+    }
 
     void ResetRound()
     {
@@ -401,6 +468,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.8f);
         rTimer.resetTimer();
         rTimer.setRoundBool(true);
+        audioManager.PlayAudio(AudioTag.Timer15);
         AnnouncerDesc.text = " Select Input ";
         ButtonsEnable(true);
         gameState = GameState.RoundWaitInput;
@@ -446,7 +514,7 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.Nothing;
         gameCompleted = true;
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(1.5f);
         GameOverPanel.SetActive(true);
         CalculateWinLoss();
         PlayfabConnet.instance.UpdateGamesPlayed();
@@ -480,12 +548,15 @@ public class GameManager : MonoBehaviour
         {
             EndPanelScore.text = GetPlayerScore(1).ToString("0");
             VictoryPanel.SetActive(playerAWon);
+            AudioTag tag = playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
+            audioManager.PlayAudio(tag);
             DefeatPanel.SetActive(!playerAWon);
         }
         if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
         {
             EndPanelScore.text = GetPlayerScore(2).ToString("0");
             VictoryPanel.SetActive(!playerAWon);
+            AudioTag tag = !playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             DefeatPanel.SetActive(playerAWon);
         }
     }
@@ -508,36 +579,38 @@ public class GameManager : MonoBehaviour
         {
             GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
             uiA.GetComponent<RoundUI>().SetUpRoundUI(playerAWon,isDraw);
-            if(playerAWon)
+            if (!isDraw)
             {
-                incrementScoreTextA.gameObject.SetActive(playerAWon);
-                incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect();
+                if (playerAWon)
+                {
+                    incrementScoreTextA.gameObject.SetActive(playerAWon);
+                    incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect(Color.white);
+                }
+                else
+                {
+                    incrementScoreTextB.gameObject.SetActive(!playerAWon);
+                    incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect(Color.white);
+                }
             }
-            else
-            {
-                incrementScoreTextB.gameObject.SetActive(!playerAWon);
-                incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect();
-            }
-            //uiA.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? WonSprite : LostSprite;
         }
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2) // 1 is Player A
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 2) 
         {
             GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
-            //uiB.transform.GetChild(0).GetComponent<Image>().sprite = playerAWon ? LostSprite : WonSprite;
             uiB.GetComponent<RoundUI>().SetUpRoundUI(!playerAWon,isDraw);
-            if (!playerAWon)
+            if (!isDraw)
             {
-                incrementScoreTextB.gameObject.SetActive(!playerAWon);
-                incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect();
-            }
-            else
-            {
-                incrementScoreTextA.gameObject.SetActive(playerAWon);
-                incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect();
+                if (!playerAWon)
+                {
+                    incrementScoreTextB.gameObject.SetActive(!playerAWon);
+                    incrementScoreTextB.GetComponent<TextFadeInEffect>().ShowEffect(Color.white);
+                }
+                else
+                {
+                    incrementScoreTextA.gameObject.SetActive(playerAWon);
+                    incrementScoreTextA.GetComponent<TextFadeInEffect>().ShowEffect(Color.white);
+                }
             }
         }
-
-
     }
 
 
@@ -552,6 +625,7 @@ public class GameManager : MonoBehaviour
             return;
         gameState = GameState.Nothing;
         rTimer.StopTimer();
+        audioManager.StopTimerSound();
         Debug.Log("Game has ended Because a player left the game in middile..");
         GameOverPanel.SetActive(true);
         EndPanelHeader.text = "Game has ended Because a player left the game in middile...";
@@ -644,6 +718,8 @@ public class GameManager : MonoBehaviour
     {
         playerOrb1.SetParticleGameObject(GetOrbAnimationName[0]);
         playerOrb2.SetParticleGameObject(GetOrbAnimationName[0]);
+        playerOrb1.ScaleUpOrb();
+        playerOrb2.ScaleUpOrb();
     }
     private void ShowOrDeSelectButtons(Button[] buttons,bool show=true)
     {
@@ -680,19 +756,73 @@ public class GameManager : MonoBehaviour
         _ => "TIE",
     };
 
+    string GenerateAnnouncerDescStringText(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    {
+        (1, 2) or (2, 1) => "TERRA BEATS TORRENT",
+        (2, 3) or (3, 2) => "TORRENT BEATS BLAZE",
+        (3, 1) or (1, 3) => "BLAZE BEATS TERRA",
+        _ => "ITS A TIE",
+    };
+
+    private void SetCardWonAndLost(PlayTrun turn)
+    {
+       switch(turn.playerA,turn.playerB)
+        {
+            case (1, 2) or (2, 1):
+                cardWon = CardType.TERRA;
+                cardLost = CardType.TORRENT;
+                break;
+            case (2, 3) or (3, 2):
+                cardWon = CardType.TORRENT;
+                cardLost = CardType.BLAZE;
+                break;
+            case (3, 1) or (1, 3):
+                cardWon = CardType.BLAZE;
+                cardLost = CardType.TERRA;
+                break;
+            default:
+                cardWon = CardType.NONE;
+                cardLost = CardType.NONE;
+                break;
+        }
+    }
+
+    string GetVFXZapAnimationName(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    {
+        (1, 2) or (2, 1) => "Base Layer.TerraZap",
+        (2, 3) or (3, 2) => "Base Layer.TorrentZap",
+        (3, 1) or (1, 3) => "Base Layer.BlazeZap",
+        _ => "TIE",
+    };
+
+    string GetVFXImpactAnimationName(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    {
+        (1, 2) or (2, 1) => "Base Layer.TerraImpact",
+        (2, 3) or (3, 2) => "Base Layer.TorrentImpact",
+        (3, 1) or (1, 3) => "Base Layer.BlazeImpact",
+        _ => "TIE",
+    };
+
     void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {
         if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
         {
-            
-            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect();
             AnnouncerHeader.text = isDraw ? "ITS A TIE" : PlayerAWon ? "YOU WON" : "YOU LOSE";
+            AnnouncerHeader.color = isDraw ? Color.white : PlayerAWon ? gameConfig.winColor : gameConfig.lostColor;
+
+           AudioTag tag = isDraw ? AudioTag.Tie : PlayerAWon ? AudioTag.PointGain : AudioTag.PointLose;
+            audioManager.PlayAudio(tag);
+
+            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect(AnnouncerHeader.color);
         }
         else if(PhotonNetwork.LocalPlayer.ActorNumber == 2) // not writing else just to make sure.....
         {
         
-            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect();
             AnnouncerHeader.text = isDraw ? "ITS A TIE" : !PlayerAWon ? "YOU WON" : "YOU LOSE";
+            AnnouncerHeader.color = isDraw ? Color.white : !PlayerAWon ? gameConfig.winColor : gameConfig.lostColor;
+            AudioTag tag = isDraw ? AudioTag.Tie : !PlayerAWon ? AudioTag.PointGain : AudioTag.PointLose;
+            audioManager.PlayAudio(tag);
+            AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect(AnnouncerHeader.color);
         }
 
     }

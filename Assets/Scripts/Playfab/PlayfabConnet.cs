@@ -145,6 +145,7 @@ public class PlayfabConnet : MonoBehaviour
     private void OnDataSend(UpdateUserDataResult result)
     {
         hasLogedIn = true;
+        //MenuManager.instance.OpenMenuId(2);
         PhotonConnector.instance.ConnectPhoton();
     }
 

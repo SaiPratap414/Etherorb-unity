@@ -61,6 +61,7 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        AudioManager.Instance.PlayAudio(AudioTag.Hover);
         if (changeSprite)
         {
             image.sprite = hoverSprite;

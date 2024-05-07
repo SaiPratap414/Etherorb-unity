@@ -47,6 +47,7 @@ public class MenuManager : MonoBehaviour
 
     private string nameKey = "displayName";
 
+    private AudioManager audioManager;
 
     private void OnEnable()
     {
@@ -78,6 +79,10 @@ public class MenuManager : MonoBehaviour
         //    nameInputField.text = "Player" + Random.Range(0, 1000).ToString("0000");
         //}
         //UserNameValueChange();
+
+        audioManager = AudioManager.Instance;
+
+        audioManager.PlayAudio(AudioTag.BG);
 
         if (PlayfabConnet.instance.GetHasLogedIn)
         {
@@ -159,11 +164,13 @@ public class MenuManager : MonoBehaviour
 
     public void FindAMatch()
     {
+        audioManager.PlayAudio(AudioTag.Button);
         OpenMenuId(3);
         PhotonConnector.instance.FindMatch();
     }
     public void StopFindMatch()
     {
+        audioManager.PlayAudio(AudioTag.Button);
         OpenMenuId(2);
 
         PhotonConnector.instance.StopSearch();
@@ -236,7 +243,7 @@ public class MenuManager : MonoBehaviour
     {
         devLoginPanel.SetActive(true);
         connectButtonPanel.SetActive(false);
-
+        audioManager.PlayAudio(AudioTag.Button);
     }    
 
     #region OrbSpawning Ui

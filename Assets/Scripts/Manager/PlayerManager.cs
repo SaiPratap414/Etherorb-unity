@@ -23,6 +23,8 @@ public class PlayerManager : MonoBehaviour
 
     public OrbDetails getOrbDetails {  get { return OrbDetails; } }
 
+    AudioManager audioManager;
+
     private void Awake()
     {
         pv = GetComponent<PhotonView>();
@@ -31,6 +33,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
+        audioManager = AudioManager.Instance;
         gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
 
         if (pv.IsMine)
@@ -93,6 +96,7 @@ public class PlayerManager : MonoBehaviour
     }
     void ChangeTheOption(int num)
     {
+        audioManager.PlayAudio(AudioTag.Button);
         currentSelectedOptions = num;
         GameManager.instance.SetSelectedStatesForButton(num,pv.OwnerActorNr);
         GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
@@ -100,6 +104,7 @@ public class PlayerManager : MonoBehaviour
 
     private void OnClickReady()
     {
+        audioManager.PlayAudio(AudioTag.Button);
         if (currentSelectedOptions > 0)
         {
             pv.RPC(nameof(RPC_ChangeTheOption), RpcTarget.All, currentSelectedOptions);

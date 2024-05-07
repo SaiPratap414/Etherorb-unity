@@ -41,7 +41,7 @@ public class OrbMenuUi : MonoBehaviour
     public void DeselectObject()
     {
         selectButton.interactable = true;
-        buttonName.text = "Select";
+        buttonName.text = "SELECT";
         isSelected = false;
     }
 
@@ -51,7 +51,7 @@ public class OrbMenuUi : MonoBehaviour
 
         OrbManager.instance.SetSelectedOrb(Orb_name.text, this.gameObject);
         selectButton.interactable = false;
-        buttonName.text = "Selected";
+        buttonName.text = "SELECTED";
 
         isSelected = true;
 

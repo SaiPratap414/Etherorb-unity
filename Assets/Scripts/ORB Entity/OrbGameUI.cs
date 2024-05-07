@@ -4,7 +4,7 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using DG.Tweening;
 
 public class OrbGameUI : MonoBehaviour
 {
@@ -60,5 +60,18 @@ public class OrbGameUI : MonoBehaviour
         yield return new WaitForSeconds(duration);
         animator.Play(GameManager.instance.GetOrbAnimationName[0]);
         yield return new WaitForSeconds(duration);
+    }
+
+    public void ScaleDownOrb()
+    {
+        //Debug.Log("Scaling down--->");
+        //animator.enabled = false;
+        //Orb_image.transform.DOScale(0, 0.517f).OnComplete(()=> { });
+    }
+
+    public void ScaleUpOrb()
+    {
+        //animator.enabled = true;
+        //Orb_image.transform.localScale = Vector3.one;
     }
 }
