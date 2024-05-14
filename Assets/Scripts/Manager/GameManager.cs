@@ -112,6 +112,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_Text EndPanelHeader;
     [SerializeField] Menu LoadingScreen;
     [SerializeField] Button homeButton;
+    [SerializeField] Button reMatchButton;
 
     [Header("")]
     [SerializeField] TMP_Text AnnouncerHeader;
@@ -165,7 +166,10 @@ public class GameManager : MonoBehaviour
     private CardType cardWon;
     private CardType cardLost;
 
+    private AudioTag vfxTag;
+
     private AudioManager audioManager;
+    private WarningPanel warningPanel;
 
     private void Awake()
     {
@@ -184,10 +188,29 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
 
         homeButton.onClick.AddListener(LeaveGame);
+        reMatchButton.onClick.AddListener(SendRematchRequest);
     }
     private void Start()
     {
-        audioManager = AudioManager.Instance;
+        warningPanel = EtherOrbManager.Instance.WarningPanel;
+        audioManager = EtherOrbManager.Instance.AudioManager;
+    }
+
+    private void ResetUIForRematch()
+    {
+        roundNum = 0;
+        roundNumText.text = "Round " + roundNum;
+        UScores[0].text = "0";
+        UScores[1].text = "0";
+        gameState = GameState.Nothing;
+        GameOverPanel.SetActive(false);
+        playerAScore = playerBScore = 0;
+        warningPanel.HideWarning();
+        warningPanel.HidePopUp();
+        foreach (Transform item in roundHistoryPlayer.transform)
+        {
+            Destroy(item.gameObject);
+        }
     }
 
     public void ShowOrHideRulePanel(bool show)
@@ -424,7 +447,6 @@ public class GameManager : MonoBehaviour
 
         spawnlastPlayUi(PlayerAWon, isDraw);
         SetAnnouncerHeader(PlayerAWon, isDraw);
-        //AnnouncerDesc.SetText(GenerateAnnouncerDescString(currentPlay));
         AnnouncerDesc.GetComponent<TextRevealEffect>().StartEffect(GenerateAnnouncerDescStringText(currentPlay));
     }
 
@@ -433,6 +455,7 @@ public class GameManager : MonoBehaviour
         zap.gameObject.SetActive(true);
         zap.enabled = true;
         WinVFXNames winVFX = gameConfig.winVFXNames.Find(x => x.type.Equals(cardWon));
+        audioManager.PlayAudio(vfxTag);
         zap.Play(winVFX.zapAnimationName);
         yield return new WaitForSeconds(0.517f);
         zap.enabled = false;
@@ -446,6 +469,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.517f);
         imapct.enabled = false;
         imapct.gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.5f);
     }
 
     void ResetRound()
@@ -518,7 +542,7 @@ public class GameManager : MonoBehaviour
         GameOverPanel.SetActive(true);
         CalculateWinLoss();
         PlayfabConnet.instance.UpdateGamesPlayed();
-        PhotonNetwork.LeaveRoom();
+        //PhotonNetwork.LeaveRoom();
     }
 
 
@@ -557,6 +581,7 @@ public class GameManager : MonoBehaviour
             EndPanelScore.text = GetPlayerScore(2).ToString("0");
             VictoryPanel.SetActive(!playerAWon);
             AudioTag tag = !playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
+            audioManager.PlayAudio(tag);
             DefeatPanel.SetActive(playerAWon);
         }
     }
@@ -614,9 +639,76 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public void SendRematchRequest()
+    {
+        pv.RPC(nameof(RPC_SendMatchRematchRequest), RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer.ActorNumber);
+    }
+
+    [PunRPC]
+    void RPC_SendMatchRematchRequest(int playernum)
+    {
+        reMatchButton.interactable = false;
+        if (PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        {
+            if(playernum ==1)
+            {
+                //Show loading...
+                warningPanel.ShowWarning("rematching to the player...", true);
+            }
+            else
+            {
+                // shop pop up
+                warningPanel.ShowPopup();
+            }
+        }
+        else if (PhotonNetwork.LocalPlayer.ActorNumber == 2) // 1 is Player A
+        {
+            if(playernum==2)
+            {
+                warningPanel.ShowWarning("rematching to the player...", true);
+            }
+            else
+            {
+                // show pop up...
+                warningPanel.ShowPopup();
+            }
+        }
+    }
+    public void ReMatchCancleRequest(int player)
+    {
+        pv.RPC(nameof(RPC_SendMatchRematchReject), RpcTarget.AllBuffered,player);
+    }
+    [PunRPC]
+    void RPC_SendMatchRematchReject(int player)
+    {
+        reMatchButton.interactable = false;
+        if (player == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            warningPanel.ShowWarning("Rematch Declined...");
+        }
+        else
+        {
+            warningPanel.HideWarning();
+        }
+    }
+    public void ReMatchAcceptance()
+    {
+        pv.RPC(nameof(RPC_SendMatchRematchAccept), RpcTarget.AllBuffered);
+    }
+    [PunRPC]
+    void RPC_SendMatchRematchAccept()
+    {
+        warningPanel.ShowWarning("Rematch Started...");
+        //TODO ResetUI...
+        ResetUIForRematch();
+        ResetOrbImages();
+        gameState = GameState.Roundstart;
+    }
 
     public void LeaveGame()
     {
+        audioManager.PlayAudio(AudioTag.Button);
+        PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel(0);
     }
     public void GameFailedExit()
@@ -771,18 +863,22 @@ public class GameManager : MonoBehaviour
             case (1, 2) or (2, 1):
                 cardWon = CardType.TERRA;
                 cardLost = CardType.TORRENT;
+                vfxTag = AudioTag.TERRA;
                 break;
             case (2, 3) or (3, 2):
                 cardWon = CardType.TORRENT;
                 cardLost = CardType.BLAZE;
+                vfxTag = AudioTag.TORRENT;
                 break;
             case (3, 1) or (1, 3):
                 cardWon = CardType.BLAZE;
                 cardLost = CardType.TERRA;
+                vfxTag = AudioTag.BLAZE;
                 break;
             default:
                 cardWon = CardType.NONE;
                 cardLost = CardType.NONE;
+                vfxTag = AudioTag.None;
                 break;
         }
     }

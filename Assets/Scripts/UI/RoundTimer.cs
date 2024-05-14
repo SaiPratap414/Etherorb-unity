@@ -22,6 +22,8 @@ public class RoundTimer : MonoBehaviour
 
     PhotonView myPhotonView;
 
+    [SerializeField] private bool rematchTimer;
+
 
 
     void Start()
@@ -86,7 +88,14 @@ public class RoundTimer : MonoBehaviour
             {
                 inRound = false;
                 TimerTxt.text = "";
-                GameManager.instance.setGameState = GameState.RoundEnd;
+                if(rematchTimer)
+                {
+                    EventManager.Instance.OnRematchTimerCompletedInvoke();
+                }
+                else
+                {
+                    GameManager.instance.setGameState = GameState.RoundEnd;
+                }
             }
         }
     }

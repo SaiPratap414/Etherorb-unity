@@ -72,6 +72,8 @@ public class TimerScript : MonoBehaviourPunCallbacks
         this.isTimerRunning = false;
         this.Text.text = string.Empty;
         cachedTimeRemaining = 0;
+
+        Debug.Log("OntimerEnd--->");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
             PhotonConnector.instance.StartGame();
@@ -99,6 +101,8 @@ public class TimerScript : MonoBehaviourPunCallbacks
 
 
             this.isTimerRunning = TimeRemaining() > 0;
+
+            Debug.Log("Is Timer Running --->" + TimeRemaining());
 
             if (this.isTimerRunning)
                 OnTimerRuns();

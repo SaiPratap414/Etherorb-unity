@@ -18,6 +18,7 @@ public class PlayfabConnet : MonoBehaviour
 
     [SerializeField] int numOfGamesPlayed = 0;
 
+    private EtherOrbManager etherOrbManager;
 
     private void Awake()
     {
@@ -29,6 +30,7 @@ public class PlayfabConnet : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
 
+        etherOrbManager = EtherOrbManager.Instance;
     }
 
 
@@ -106,7 +108,7 @@ public class PlayfabConnet : MonoBehaviour
     {
         playerName = _name;
         UpdatePlayerName();
-        MenuManager.instance.OpenMenuId(2);
+        //MenuManager.instance.OpenMenuId(2);
     }
 
     private void UpdatePlayerName()
@@ -146,14 +148,15 @@ public class PlayfabConnet : MonoBehaviour
     {
         hasLogedIn = true;
         //MenuManager.instance.OpenMenuId(2);
-        PhotonConnector.instance.ConnectPhoton();
+        //PhotonConnector.instance.ConnectPhoton();
     }
 
     private void OnDataError(PlayFabError error)
     {
 
         Debug.LogError("Player Data Error: " + error.ErrorMessage);
-        MenuManager.instance.OpenMenuId(0);
+        //MenuManager.instance.OpenMenuId(0);
+        etherOrbManager.WarningPanel.ShowWarning(error.ErrorMessage);
     }
 
     private void GetPlayerData()

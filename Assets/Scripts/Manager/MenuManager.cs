@@ -80,7 +80,7 @@ public class MenuManager : MonoBehaviour
         //}
         //UserNameValueChange();
 
-        audioManager = AudioManager.Instance;
+        audioManager = EtherOrbManager.Instance.AudioManager;
 
         audioManager.PlayAudio(AudioTag.BG);
 
@@ -192,12 +192,10 @@ public class MenuManager : MonoBehaviour
     {
         if (scene.buildIndex == 0)
         {
-            //PlayFabManager
-            SetMatchFoundProperties("FINDING MATCH",Color.black,true);
+            SetMatchFoundProperties("FINDING MATCH", Color.black, true);
         }
         if (scene.buildIndex == 1)
         {
-            Debug.Log("Scene 1 has been loaded!");
             PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity);
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
@@ -266,7 +264,7 @@ public class MenuManager : MonoBehaviour
             PlayfabConnet.instance.SetPlayerName(name_IF.text);
             nameText.text = name_IF.text;
             //UserNameValueChange();
-            newuserNamePanel.SetActive(false);
+            //newuserNamePanel.SetActive(false);
         }
     }
     #endregion

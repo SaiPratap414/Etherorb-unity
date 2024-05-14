@@ -48,6 +48,9 @@ MonoBehaviour:
   - RPC_waitingForResult
   - RPC_SendThisToGameManager
   - RPC_StoreRandomOption
+  - RPC_SendMatchRematchRequest
+  - RPC_SendMatchRematchAccept
+  - RPC_SendMatchRematchReject
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

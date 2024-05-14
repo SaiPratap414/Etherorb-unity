@@ -33,7 +33,8 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
-        audioManager = AudioManager.Instance;
+        Debug.Log("Starting---->");
+        audioManager = EtherOrbManager.Instance.AudioManager;
         gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
 
         if (pv.IsMine)
@@ -104,7 +105,7 @@ public class PlayerManager : MonoBehaviour
 
     private void OnClickReady()
     {
-        audioManager.PlayAudio(AudioTag.Button);
+        audioManager.PlayAudio(AudioTag.ReadyButton);
         if (currentSelectedOptions > 0)
         {
             pv.RPC(nameof(RPC_ChangeTheOption), RpcTarget.All, currentSelectedOptions);

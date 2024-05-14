@@ -14,7 +14,11 @@ public enum AudioTag
     WinScreen,
     LoseScreen,
     Error,
-    Tie
+    Tie,
+    TERRA,
+    TORRENT,
+    BLAZE,
+    None
 }
 
 public class AudioManager : MonoBehaviour
@@ -31,7 +35,6 @@ public class AudioManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(this);
     }
     public void PlayAudio(AudioTag audioTag)
     {
@@ -65,5 +68,24 @@ public class AudioManager : MonoBehaviour
     public void StopTimerSound()
     {
         timerSource.Stop();
+    }
+    public void StopMusic()
+    {
+        bgSource.Pause();
+    }
+    public void StopSfxSound()
+    {
+        sfxSource.Pause();
+        timerSource.Pause();
+    }
+
+    public void PlayMusic()
+    {
+        bgSource.Play();
+    }
+    public void PlaySfx()
+    {
+        sfxSource.Play();
+        timerSource.Play();
     }
 }
