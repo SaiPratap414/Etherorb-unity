@@ -65,6 +65,8 @@ public class TimerScript : MonoBehaviourPunCallbacks
     {
         MenuManager.instance.SetMatchFoundProperties("MATCH FOUND",Color.white,false);
         this.isTimerRunning = true;
+        MenuManager.instance.StopMatchMakingTimer();
+        PhotonConnector.instance.isRetryingMatch = false;
     }
 
     private void OnTimerEnds()

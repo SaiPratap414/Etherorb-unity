@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +5,8 @@ using UnityEngine.UI;
 
 public class OrbMenuUi : MonoBehaviour
 {
+    [SerializeField] GameObject highlightBoarder;
+    [SerializeField] Image BG;
     [SerializeField] Image Orb_image;
     [SerializeField] TMP_Text Orb_name;
     [SerializeField] TMP_Text Terra_num;
@@ -16,6 +16,9 @@ public class OrbMenuUi : MonoBehaviour
 
     [SerializeField] Button selectButton;
     [SerializeField] TMP_Text buttonName;
+
+    [SerializeField] Color selectedColor;
+    [SerializeField] Color deSelectedColor;
 
     bool isSelected = false;
 
@@ -42,7 +45,9 @@ public class OrbMenuUi : MonoBehaviour
     {
         selectButton.interactable = true;
         buttonName.text = "SELECT";
+        BG.color = deSelectedColor;
         isSelected = false;
+        highlightBoarder.SetActive(false);
     }
 
     void OnSelected()
@@ -51,12 +56,10 @@ public class OrbMenuUi : MonoBehaviour
 
         OrbManager.instance.SetSelectedOrb(Orb_name.text, this.gameObject);
         selectButton.interactable = false;
+        BG.color = selectedColor;
         buttonName.text = "SELECTED";
-
+        highlightBoarder.SetActive(true);
         isSelected = true;
 
     }
-
-
-
 }

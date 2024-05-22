@@ -14,6 +14,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     [Header("Photon Debugs")]
     [SerializeField] private string nickName;
 
+    public bool isRetryingMatch = false;
 
     private string nameKey = "displayName";
 
@@ -43,7 +44,9 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     public void ConnectPhoton()
     {
-        if (PhotonNetwork.IsConnectedAndReady || PhotonNetwork.IsConnected) return;
+        if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsConnected)
+            return;
+
         ConnectToPhoton();
 
         nickName = PlayfabConnet.instance.PlayerName;
@@ -70,8 +73,15 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     public void FindMatch()
     {
         //Try to join a pre existing room - if it fails, create one
-        PhotonNetwork.JoinRandomRoom();
-        Debug.Log("Searching for A Game");
+        if (PhotonNetwork.IsConnected && PhotonNetwork.IsConnectedAndReady)
+        {
+            PhotonNetwork.JoinRandomOrCreateRoom();
+            Debug.Log("Searching for A Game");
+        }
+        else
+        {
+            ConnectPhoton();
+        }
     }
 
     void MakeRoom()
@@ -95,7 +105,8 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     public void StopSearch()
     {
-        PhotonNetwork.LeaveRoom();
+        if(PhotonNetwork.CurrentRoom !=null)
+            PhotonNetwork.LeaveRoom();
         Debug.Log("Searching for match has been stoped ");
     }
 
@@ -119,7 +130,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("You have connected to the Photon Master Server");
+        Debug.Log("You have connected to the Photon Master Server" + PhotonNetwork.IsConnected);
         if (!PhotonNetwork.InLobby)
         {
             PhotonNetwork.JoinLobby();
@@ -129,11 +140,23 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedLobby()
     {
-        Debug.Log("You have connected to a Photon Lobby");
-        OrbManager.instance.GetAllOrbDetails();
-        MenuManager.instance.OpenMenuId(2);
+        if (!isRetryingMatch)
+        {
+            Debug.Log("You have connected to a Photon Lobby");
+            OrbManager.instance.GetAllOrbDetails();
+            MenuManager.instance.OpenMenuId(2);
+        }
+        else
+        {
+            FindMatch();
+        }
     }
-
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        base.OnDisconnected(cause);
+        Debug.Log(cause);
+        //ConnectPhoton();
+    }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {

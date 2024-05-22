@@ -45,9 +45,14 @@ public class MenuManager : MonoBehaviour
     [SerializeField] GameObject connectButtonPanel;
     [SerializeField] GameObject devLoginPanel;
 
+    [SerializeField] MatchMaking matchMaking;
+
     private string nameKey = "displayName";
 
     private AudioManager audioManager;
+
+    [SerializeField] private GameObject retryPanel;
+    [SerializeField] private FindMatchMidPanel findMatchMidPanel;
 
     private void OnEnable()
     {
@@ -165,15 +170,48 @@ public class MenuManager : MonoBehaviour
     public void FindAMatch()
     {
         audioManager.PlayAudio(AudioTag.Button);
+        stopMatch.SetActive(true);
+        retryPanel.SetActive(false);
         OpenMenuId(3);
+        findMatchMidPanel.StartPanelMove();
+        matchMaking.StartTimer();
         PhotonConnector.instance.FindMatch();
     }
     public void StopFindMatch()
     {
         audioManager.PlayAudio(AudioTag.Button);
         OpenMenuId(2);
-
+        matchMaking.StopTimer();
         PhotonConnector.instance.StopSearch();
+    }
+
+    public void RetryMatchMake()
+    {
+        //connect to photon and find a match...
+        matchMaking.StopTimer();
+        matchMaking.StartTimer();
+        PhotonConnector.instance.isRetryingMatch = true;
+        PhotonConnector.instance.DisconnectPhoton();
+        Debug.Log("Connecting to photon --->");
+        //StartCoroutine(WaitForPhotonConnection());
+        retryPanel.SetActive(false);
+        stopMatch.SetActive(true);
+
+    }
+    private IEnumerator WaitForPhotonConnection()
+    {
+        yield return new WaitForSeconds(3);
+        PhotonConnector.instance.FindMatch();
+        Debug.Log("Start fininding match--->");
+    }
+
+    public void BackToHome()
+    {
+        SetMatchFoundProperties("FINDING MATCH", Color.black, true);
+        PhotonConnector.instance.isRetryingMatch = false;
+        stopMatch.SetActive(true);
+        retryPanel.SetActive(false);
+        StopFindMatch();
     }
 
     // Enable Match found Ui elements 
@@ -266,6 +304,20 @@ public class MenuManager : MonoBehaviour
             //UserNameValueChange();
             //newuserNamePanel.SetActive(false);
         }
+    }
+
+    public void ShowRetryPanel()
+    {
+        EtherOrbManager.Instance.WarningPanel.ShowWarning("Connection Failed Please click on Retry.");
+        SetMatchFoundProperties("MATCH NOT FOUND", Color.black, false);
+        PhotonConnector.instance.isRetryingMatch = true;
+        retryPanel.SetActive(true);
+        stopMatch.SetActive(false);
+    }
+
+    public void StopMatchMakingTimer()
+    {
+        matchMaking.StopTimer();
     }
     #endregion
 

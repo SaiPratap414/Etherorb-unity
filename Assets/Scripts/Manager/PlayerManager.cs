@@ -33,7 +33,6 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("Starting---->");
         audioManager = EtherOrbManager.Instance.AudioManager;
         gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
 

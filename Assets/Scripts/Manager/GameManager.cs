@@ -300,6 +300,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         GenerateRandomOption();
+        yield return new WaitForSeconds(0.5f);
         if (PhotonNetwork.IsMasterClient)
             pv.RPC(nameof(RPC_CalculatePlay), RpcTarget.AllBuffered);
 
@@ -761,6 +762,7 @@ public class GameManager : MonoBehaviour
             int RandomB = UnityEngine.Random.Range(1, 4);
             Debug.Log("Random Generated: A-" + RandomA + "B-" + RandomB);
             pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, RandomA, RandomB);
+            AnnouncerDesc.text = "NO Input Selected";
         }
     }
 
@@ -793,11 +795,15 @@ public class GameManager : MonoBehaviour
         {
             ShowOrDeSelectButtons(GetOptionButtonsPlayer1);
             GetOptionButtonsPlayer1[index - 1].GetComponent<ButtonUtility>().SelectedStateAction();
+            string[] name = GetOptionButtonsPlayer1[index - 1].name.Split('_');
+            AnnouncerDesc.text = name.Length > 0 ? name[0] + " Selected" : string.Empty;
         }
         else
         {
             ShowOrDeSelectButtons(GetOptionButtonsPlayer2);
             GetOptionButtonsPlayer2[index - 1].GetComponent<ButtonUtility>().SelectedStateAction();
+            string[] name = GetOptionButtonsPlayer2[index - 1].name.Split('_');
+            AnnouncerDesc.text = name.Length > 0 ? name[0] + " Selected" : string.Empty;
         }
     }
 
@@ -826,11 +832,6 @@ public class GameManager : MonoBehaviour
         elementGameobjectPlayerA.SetActive(show);
         elementGameobjectPlayerB.SetActive(show);
         staticUIPanel.SetActive(show);
-        foreach (var item in UNames)
-        {
-            item.gameObject.SetActive(show);
-        }
-        
     }
     public void SetPlayerReady(int playerNum)
     {
@@ -882,22 +883,6 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-
-    string GetVFXZapAnimationName(PlayTrun turn) => (turn.playerA, turn.playerB) switch
-    {
-        (1, 2) or (2, 1) => "Base Layer.TerraZap",
-        (2, 3) or (3, 2) => "Base Layer.TorrentZap",
-        (3, 1) or (1, 3) => "Base Layer.BlazeZap",
-        _ => "TIE",
-    };
-
-    string GetVFXImpactAnimationName(PlayTrun turn) => (turn.playerA, turn.playerB) switch
-    {
-        (1, 2) or (2, 1) => "Base Layer.TerraImpact",
-        (2, 3) or (3, 2) => "Base Layer.TorrentImpact",
-        (3, 1) or (1, 3) => "Base Layer.BlazeImpact",
-        _ => "TIE",
-    };
 
     void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {

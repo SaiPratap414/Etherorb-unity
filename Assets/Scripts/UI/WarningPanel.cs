@@ -119,7 +119,7 @@ public class WarningPanel : MonoBehaviour
         GameManager.instance.ReMatchCancleRequest(PhotonNetwork.LocalPlayer.ActorNumber);
     }
 
-    public void OnMusicToggleValueChange(bool value)
+    public void OnMusicToggleValueChange()
     {
         musicImage.sprite = music.isOn ? musicOn : musicOff;
         if(music.isOn)
@@ -127,7 +127,7 @@ public class WarningPanel : MonoBehaviour
         else
             EtherOrbManager.Instance.AudioManager.StopMusic();
     }
-    public void OnSoundToggleValueChange(bool value)
+    public void OnSoundToggleValueChange()
     {
         soundImage.sprite = sound.isOn ? soundOn : soundOff;
         if (sound.isOn)

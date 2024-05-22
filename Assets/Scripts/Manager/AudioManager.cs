@@ -46,7 +46,7 @@ public class AudioManager : MonoBehaviour
             {
                 PlayAudio(bgSource, audios);
             }
-            if (audios.AudioTag == AudioTag.Timer15)
+            else if (audios.AudioTag == AudioTag.Timer15)
             {
                 PlayAudio(timerSource, audios);
             }
@@ -71,20 +71,26 @@ public class AudioManager : MonoBehaviour
     }
     public void StopMusic()
     {
-        bgSource.Pause();
+        bgSource.Stop();
+        bgSource.enabled = false;
     }
     public void StopSfxSound()
     {
-        sfxSource.Pause();
-        timerSource.Pause();
+        sfxSource.Stop();
+        timerSource.Stop();
+        sfxSource.enabled = false;
+        timerSource.enabled = false;
     }
 
     public void PlayMusic()
     {
+        bgSource.enabled = true;
         bgSource.Play();
     }
     public void PlaySfx()
     {
+        sfxSource.enabled = true;
+        timerSource.enabled = true;
         sfxSource.Play();
         timerSource.Play();
     }
