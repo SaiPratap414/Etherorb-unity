@@ -94,6 +94,7 @@ public class RoundTimer : MonoBehaviour
                 }
                 else
                 {
+                    GameManager.instance.RevealChoices();
                     GameManager.instance.setGameState = GameState.RoundEnd;
                 }
             }

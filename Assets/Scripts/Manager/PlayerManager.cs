@@ -100,6 +100,10 @@ public class PlayerManager : MonoBehaviour
         currentSelectedOptions = num;
         GameManager.instance.SetSelectedStatesForButton(num,pv.OwnerActorNr);
         GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
+        if(currentSelectedOptions > 0)
+        {
+            pv.RPC(nameof(RPC_SaveChoices), RpcTarget.All, currentSelectedOptions);
+        }
     }
 
     private void OnClickReady()
@@ -124,12 +128,14 @@ public class PlayerManager : MonoBehaviour
     [PunRPC]
     void RPC_ChangeTheOption(int num)
     {
-
-        //GameManager.instance.SetParticleGameObject(GameManager.instance.GetOrbAnimationName[num], pv.OwnerActorNr);
-        //GameManager.instance.ShowParticleGameObjects(num, pv.OwnerActorNr);
-        GameManager.instance.InputChoise(num, pv.OwnerActorNr);
+        GameManager.instance.SaveAndPlayChoices(num, pv.OwnerActorNr);
     }
 
+    [PunRPC]
+    void RPC_SaveChoices(int choice)
+    {
+        GameManager.instance.SaveChoices(choice, pv.OwnerActorNr);
+    }
 
 
     [PunRPC]

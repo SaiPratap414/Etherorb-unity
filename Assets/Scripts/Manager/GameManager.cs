@@ -7,7 +7,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 [Serializable]
 public class PlayTrun
 {
@@ -41,7 +40,6 @@ public class PlayTrun
 
         
     }
-
 }
 
 [Serializable]
@@ -171,6 +169,10 @@ public class GameManager : MonoBehaviour
     private AudioManager audioManager;
     private WarningPanel warningPanel;
 
+    private int numberOfBothPlayerFailedAttempt = 0;
+    public int numberOfPlayerAFailedAttempt = 0;
+    public int numberOfPlayerBFailedAttempt = 0;
+
     private void Awake()
     {
         instance = this;
@@ -207,6 +209,9 @@ public class GameManager : MonoBehaviour
         playerAScore = playerBScore = 0;
         warningPanel.HideWarning();
         warningPanel.HidePopUp();
+        numberOfBothPlayerFailedAttempt = 0;
+        numberOfPlayerAFailedAttempt = 0;
+        numberOfPlayerBFailedAttempt = 0;
         foreach (Transform item in roundHistoryPlayer.transform)
         {
             Destroy(item.gameObject);
@@ -255,20 +260,14 @@ public class GameManager : MonoBehaviour
 
     void CheckInput()
     {
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
-        {
-            if (currentPlay.playerA != 0)
-            {
-                
-            }
-        }
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
-        {
-            if (currentPlay.playerB != 0)
-            {
-               
-            }
-        }
+       // Implement if needed...
+    }
+
+    public void SaveAndPlayChoices(int choice, int ActorNumber)
+    {
+        SaveChoices(choice, ActorNumber);
+        PlayChoices();
+
         if (currentPlay.playerA != 0 && currentPlay.playerB != 0)
         {
             gameState = GameState.RoundEnd;
@@ -277,18 +276,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void InputChoise(int choice, int ActorNumber)
+    public void PlayChoices()
     {
-        if (ActorNumber == 1) currentPlay.playerA = choice;
-        if (ActorNumber == 2) currentPlay.playerB = choice;
-
-        if(currentPlay.playerA !=0 && currentPlay.playerB !=0)
+        if (currentPlay.playerA != 0 && currentPlay.playerB != 0)
         {
-            SetParticleGameObject(GetOrbAnimationName[currentPlay.playerA], 1);
-            SetParticleGameObject(GetOrbAnimationName[currentPlay.playerB], 2);
+            RevealChoices();
         }
     }
 
+    public void RevealChoices()
+    {
+        SetParticleGameObject(GetOrbAnimationName[currentPlay.playerA], 1);
+        SetParticleGameObject(GetOrbAnimationName[currentPlay.playerB], 2);
+    }
+
+    public void SaveChoices(int choice, int ActorNumber)
+    {
+        if (ActorNumber == 1) currentPlay.playerA = choice;
+        if (ActorNumber == 2) currentPlay.playerB = choice;
+    }
 
     IEnumerator CalculatePlay()
     {
@@ -314,17 +320,36 @@ public class GameManager : MonoBehaviour
     {
         bool PlayerAWon = false;
         bool isDraw = false;
-        if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
+        if(currentPlay.playerA == 0 && currentPlay.playerB == 0)
         {
-            Debug.LogWarning("Calculate Play is being called");
+            //Lets draw the match as 2 failed attempts from both player...
+            isDraw = true;
+            numberOfBothPlayerFailedAttempt++;
+        }
+        else if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
+        {
+            //Lets consider a when 1st player failed to attempt the option...
             if (currentPlay.playerA == 0)
             {
-                currentPlay.playerA = RandomPlay.playerA; // 1-3
+                numberOfPlayerAFailedAttempt++;
+                if (numberOfPlayerAFailedAttempt < 2)
+                {
+                    currentPlay.playerA = RandomPlay.playerA; // 1-3
+                    isDraw = true;
+                    PlayerAWon = false;
+                }
             }
-
-            if (currentPlay.playerB == 0)
+            //Lets consider a when 2nd player failed to attempt the option...
+            else if (currentPlay.playerB == 0)
             {
-                currentPlay.playerB = RandomPlay.playerB; // 1-3
+                numberOfPlayerBFailedAttempt++;
+                if (numberOfPlayerBFailedAttempt < 2)
+                {
+                    // give point to playerA...
+                    currentPlay.playerB = RandomPlay.playerB; // 1-3
+                    isDraw = true;
+                    PlayerAWon = false;
+                }
             }
         }
 
@@ -395,19 +420,35 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            int whoWon = currentPlay.GetWhoWon();
-
-            if (whoWon == 1)
-            {
-                playerAScore += 1;
-                Debug.LogWarning("Player A Won");
-                PlayerAWon = true;
-            }
-            else if (whoWon == 2)
+            if (numberOfPlayerAFailedAttempt >= 2)
             {
                 playerBScore += 1;
-                Debug.LogWarning("Player B Won");
                 PlayerAWon = false;
+            }
+            else if (numberOfPlayerBFailedAttempt >= 2)
+            {
+                playerAScore += 1;
+                PlayerAWon = true;
+            }
+            else
+            {
+                if (currentPlay.playerA != 0 && currentPlay.playerB != 0)
+                {
+                    int whoWon = currentPlay.GetWhoWon();
+
+                    if (whoWon == 1)
+                    {
+                        playerAScore += 1;
+                        Debug.LogWarning("Player A Won");
+                        PlayerAWon = true;
+                    }
+                    else if (whoWon == 2)
+                    {
+                        playerBScore += 1;
+                        Debug.LogWarning("Player B Won");
+                        PlayerAWon = false;
+                    }
+                }
             }
         }
 
@@ -453,20 +494,25 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator ExecuteAnimationSequence(Animator zap,Animator imapct, OrbGameUI orbGameUI)
     {
-        zap.gameObject.SetActive(true);
-        zap.enabled = true;
         WinVFXNames winVFX = gameConfig.winVFXNames.Find(x => x.type.Equals(cardWon));
         audioManager.PlayAudio(vfxTag);
-        zap.Play(winVFX.zapAnimationName);
-        yield return new WaitForSeconds(0.517f);
-        zap.enabled = false;
-        zap.gameObject.SetActive(false);
 
+        if (winVFX != null)
+        {
+            zap.gameObject.SetActive(true);
+            zap.enabled = true;
+            zap.Play(winVFX.zapAnimationName);
+            yield return new WaitForSeconds(0.517f);
+            zap.enabled = false;
+            zap.gameObject.SetActive(false);
+        }
+
+        LostAnimationName lostVFX = gameConfig.lostAnimationNames.Find(x => x.type.Equals(cardLost));
         imapct.gameObject.SetActive(true);
         imapct.enabled = true;
         imapct.Play(winVFX.impactAnimationName);
-        LostAnimationName lostVFX = gameConfig.lostAnimationNames.Find(x => x.type.Equals(cardLost));
-        orbGameUI.SetParticleGameObject(lostVFX.lostAnimationName);
+        if(lostVFX!=null)
+            orbGameUI.SetParticleGameObject(lostVFX.lostAnimationName);
         yield return new WaitForSeconds(0.517f);
         imapct.enabled = false;
         imapct.gameObject.SetActive(false);
@@ -524,7 +570,11 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
         yield return new WaitForSeconds(1f);
         roundNum++;
-        if(playerAScore < 3 && playerBScore < 3)
+        if(numberOfBothPlayerFailedAttempt>=2)
+        {
+            gameState = GameState.GameEnd;
+        }
+        else if(playerAScore < 3 && playerBScore < 3)
         {
             roundNumText.text = "Round " + roundNum;
             gameState = GameState.Roundstart;
@@ -543,7 +593,6 @@ public class GameManager : MonoBehaviour
         GameOverPanel.SetActive(true);
         CalculateWinLoss();
         PlayfabConnet.instance.UpdateGamesPlayed();
-        //PhotonNetwork.LeaveRoom();
     }
 
 
@@ -725,8 +774,6 @@ public class GameManager : MonoBehaviour
         EndPanelScore.gameObject.SetActive(false);
     }
 
-
-
     public int GetPlayerScore(int player)
     {
         if (player == 1)
@@ -751,18 +798,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     void GenerateRandomOption()
     {
         if(!PhotonNetwork.IsMasterClient)
             return;
-        if (currentPlay.playerA == 0 || currentPlay.playerB == 0)
+        if (currentPlay.playerA == 0 && currentPlay.playerB == 0)
         {
-            int RandomA = UnityEngine.Random.Range(1, 4);
-            int RandomB = UnityEngine.Random.Range(1, 4);
-            Debug.Log("Random Generated: A-" + RandomA + "B-" + RandomB);
-            pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, RandomA, RandomB);
+            //when both player have not played...
+            pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, 0, 0);
+            Debug.Log("No one played input");
             AnnouncerDesc.text = "NO Input Selected";
+        }
+        else if(currentPlay.playerA == 0)
+        {
+            Debug.Log("Random Generated: A-");
+            pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, 0, currentPlay.playerB);
+            AnnouncerDesc.text = "NO Input Selected";
+        }
+        else if(currentPlay.playerB == 0)
+        {
+            int RandomB = numberOfPlayerAFailedAttempt < 1 ? UnityEngine.Random.Range(1, 4):0;
+            Debug.Log("Random Generated: B-");
+            pv.RPC(nameof(RPC_StoreRandomOption), RpcTarget.All, currentPlay.playerA, 0);
         }
     }
 
@@ -809,8 +866,11 @@ public class GameManager : MonoBehaviour
 
     public void SetParticleGameObject(string animationName,int ActorNumber)
     {
-        if (ActorNumber == 1) playerOrb1.SetParticleGameObject(animationName);
-        if (ActorNumber == 2) playerOrb2.SetParticleGameObject(animationName);
+        if (ActorNumber == 1)
+            playerOrb1.SetParticleGameObject(animationName);
+
+        if (ActorNumber == 2)
+            playerOrb2.SetParticleGameObject(animationName);
     }
     private void ResetOrbImages()
     {
@@ -841,7 +901,7 @@ public class GameManager : MonoBehaviour
             isPlayer2R = true;
     }
 
-    string GenerateAnnouncerDescString(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    private string GenerateAnnouncerDescString(PlayTrun turn) => (turn.playerA, turn.playerB) switch
     {
         (1, 2) or (2, 1) => "<color=#83C878>Terra</color> beats <color=#5189BD>Torrent</color>",
         (2, 3) or (3, 2) => "<color=#5189BD>Torrent</color> beats <color=#EE8868>Blaze</color>",
@@ -849,7 +909,7 @@ public class GameManager : MonoBehaviour
         _ => "TIE",
     };
 
-    string GenerateAnnouncerDescStringText(PlayTrun turn) => (turn.playerA, turn.playerB) switch
+    private string GenerateAnnouncerDescStringText(PlayTrun turn) => (turn.playerA, turn.playerB) switch
     {
         (1, 2) or (2, 1) => "TERRA BEATS TORRENT",
         (2, 3) or (3, 2) => "TORRENT BEATS BLAZE",
@@ -876,6 +936,21 @@ public class GameManager : MonoBehaviour
                 cardLost = CardType.TERRA;
                 vfxTag = AudioTag.BLAZE;
                 break;
+            case (0, 1) or (1, 0):
+                cardWon = CardType.TERRA;
+                cardLost = CardType.NONE;
+                vfxTag = AudioTag.TERRA;
+                break;
+            case (0, 2) or (2, 0):
+                cardWon = CardType.TORRENT;
+                cardLost = CardType.NONE;
+                vfxTag = AudioTag.TORRENT;
+                break;
+            case (0, 3) or (3, 0):
+                cardWon = CardType.BLAZE;
+                cardLost = CardType.NONE;
+                vfxTag = AudioTag.BLAZE;
+                break;
             default:
                 cardWon = CardType.NONE;
                 cardLost = CardType.NONE;
@@ -884,7 +959,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
+    private void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {
         if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
         {
@@ -898,7 +973,6 @@ public class GameManager : MonoBehaviour
         }
         else if(PhotonNetwork.LocalPlayer.ActorNumber == 2) // not writing else just to make sure.....
         {
-        
             AnnouncerHeader.text = isDraw ? "ITS A TIE" : !PlayerAWon ? "YOU WON" : "YOU LOSE";
             AnnouncerHeader.color = isDraw ? Color.white : !PlayerAWon ? gameConfig.winColor : gameConfig.lostColor;
             AudioTag tag = isDraw ? AudioTag.Tie : !PlayerAWon ? AudioTag.PointGain : AudioTag.PointLose;

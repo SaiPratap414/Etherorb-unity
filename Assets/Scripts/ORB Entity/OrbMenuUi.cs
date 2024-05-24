@@ -20,6 +20,8 @@ public class OrbMenuUi : MonoBehaviour
     [SerializeField] Color selectedColor;
     [SerializeField] Color deSelectedColor;
 
+    private Vector3 selectedScale = new Vector3(1.06f, 1.06f, 1.06f);
+
     bool isSelected = false;
 
     private void Start()
@@ -44,8 +46,9 @@ public class OrbMenuUi : MonoBehaviour
     public void DeselectObject()
     {
         selectButton.interactable = true;
-        buttonName.text = "SELECT";
+        buttonName.text = string.Empty;
         BG.color = deSelectedColor;
+        transform.localScale = Vector3.one;
         isSelected = false;
         highlightBoarder.SetActive(false);
     }
@@ -59,6 +62,7 @@ public class OrbMenuUi : MonoBehaviour
         BG.color = selectedColor;
         buttonName.text = "SELECTED";
         highlightBoarder.SetActive(true);
+        transform.localScale = selectedScale;
         isSelected = true;
 
     }
