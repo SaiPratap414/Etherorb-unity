@@ -1,10 +1,6 @@
 using Photon.Pun;
-using Photon.Pun.UtilityScripts;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -32,7 +28,6 @@ public class MenuManager : MonoBehaviour
     [SerializeField] GameObject loginPanel;
     [SerializeField] TMP_InputField Email_IF;
 
-
     [Header("PlayFab Username First Time..")]
     [SerializeField] GameObject newuserNamePanel;
     [SerializeField] TMP_InputField name_IF;
@@ -45,9 +40,10 @@ public class MenuManager : MonoBehaviour
     [SerializeField] GameObject connectButtonPanel;
     [SerializeField] GameObject devLoginPanel;
 
-    [SerializeField] MatchMaking matchMaking;
+    [SerializeField] Button addNFTButton;
+    [SerializeField] Button startMatch;
 
-    private string nameKey = "displayName";
+    [SerializeField] MatchMaking matchMaking;
 
     private AudioManager audioManager;
 
@@ -59,18 +55,14 @@ public class MenuManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void OnDisable()
-    {
-    }
-
     private void Awake()
     {
         instance = this;
         if (PhotonNetwork.IsConnected)
         {
             Debug.Log("PhotonNetwork name -- " + PhotonNetwork.LocalPlayer.NickName);
-
         }
+        addNFTButton.onClick.AddListener(AddNFT);
     }
 
     private void Start()
@@ -192,8 +184,6 @@ public class MenuManager : MonoBehaviour
         matchMaking.StartTimer();
         PhotonConnector.instance.isRetryingMatch = true;
         PhotonConnector.instance.DisconnectPhoton();
-        Debug.Log("Connecting to photon --->");
-        //StartCoroutine(WaitForPhotonConnection());
         retryPanel.SetActive(false);
         stopMatch.SetActive(true);
 
@@ -261,6 +251,8 @@ public class MenuManager : MonoBehaviour
     public void LoginWithWalletAddress(string addr)
     {
         if (addr.Length < 3) return;
+
+        EtherOrbManager.Instance.WarningPanel.SetUserWallet(addr);
         PlayfabConnet.instance.PlayFabLoginWithWalletId(addr);
     }
 
@@ -280,7 +272,27 @@ public class MenuManager : MonoBehaviour
         devLoginPanel.SetActive(true);
         connectButtonPanel.SetActive(false);
         audioManager.PlayAudio(AudioTag.Button);
-    }    
+    }
+    public void NoNFTScreen()
+    {
+        addNFTButton.gameObject.SetActive(true);
+        startMatch.enabled = false;
+    }
+    public void NFTScreen()
+    {
+        addNFTButton.gameObject.SetActive(false);
+        startMatch.enabled = true;
+    }
+    private void AddNFT()
+    {
+        ApiManager.Instance.AddNFTs();
+        addNFTButton.gameObject.SetActive(false);
+    }
+    public void GetUserNFTs()
+    {
+        if(!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+            ApiManager.Instance.GetUserNFTs(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress());
+    }
 
     #region OrbSpawning Ui
 
@@ -301,8 +313,6 @@ public class MenuManager : MonoBehaviour
         {
             PlayfabConnet.instance.SetPlayerName(name_IF.text);
             nameText.text = name_IF.text;
-            //UserNameValueChange();
-            //newuserNamePanel.SetActive(false);
         }
     }
 
@@ -318,6 +328,15 @@ public class MenuManager : MonoBehaviour
     public void StopMatchMakingTimer()
     {
         matchMaking.StopTimer();
+    }
+
+    public void OnMatchFound()
+    {
+        SetMatchFoundProperties("MATCH FOUND", Color.white, false);
+        string roomId = PhotonNetwork.CurrentRoom.Name;
+        ApiManager.Instance.StartMatchWithNFT(roomId);
+        StopMatchMakingTimer();
+        PhotonConnector.instance.isRetryingMatch = false;
     }
     #endregion
 

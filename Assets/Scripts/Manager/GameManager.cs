@@ -173,6 +173,8 @@ public class GameManager : MonoBehaviour
     public int numberOfPlayerAFailedAttempt = 0;
     public int numberOfPlayerBFailedAttempt = 0;
 
+    public List<string> userWallets = new List<string>();
+
     private void Awake()
     {
         instance = this;
@@ -182,7 +184,11 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < players.Length; i++)
         {
             Debug.Log(players[i].NickName + " Actor name, " + players[i].ActorNumber + " Actor number");
-            UNames[i].text = players[i].NickName;
+            string [] userString = players[i].NickName.Split("_");
+            UNames[i].text = userString[0];
+
+            if(userString.Length>0)
+                userWallets.Add(userString[1]);
         }
         roundNumText.text = "Round " + roundNum;
         UScores[0].text = "0";
@@ -625,6 +631,9 @@ public class GameManager : MonoBehaviour
             AudioTag tag = playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
             DefeatPanel.SetActive(!playerAWon);
+            string winnerAddress = playerAWon ? userWallets[0] : userWallets[1];
+            Debug.Log("winnerAddress----> " + winnerAddress);
+            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name,winnerAddress);
         }
         if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
         {
@@ -633,6 +642,10 @@ public class GameManager : MonoBehaviour
             AudioTag tag = !playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
             DefeatPanel.SetActive(playerAWon);
+
+            string winnerAddress = playerAWon ? userWallets[0] : userWallets[1];
+            Debug.Log("winnerAddress----> " + winnerAddress);
+            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winnerAddress);
         }
     }
 
@@ -763,12 +776,15 @@ public class GameManager : MonoBehaviour
     }
     public void GameFailedExit()
     {
+        PhotonNetwork.LeaveRoom();
+        reMatchButton.interactable = false;
+        Debug.Log("Game has ended Because a player left the room...");
+        EtherOrbManager.Instance.WarningPanel.ShowWarning("Player left the game...");
         if (gameCompleted)
             return;
         gameState = GameState.Nothing;
         rTimer.StopTimer();
         audioManager.StopTimerSound();
-        Debug.Log("Game has ended Because a player left the game in middile..");
         GameOverPanel.SetActive(true);
         EndPanelHeader.text = "Game has ended Because a player left the game in middile...";
         EndPanelScore.gameObject.SetActive(false);
@@ -958,7 +974,6 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-
     private void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {
         if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A

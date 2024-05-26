@@ -1,8 +1,4 @@
 using Photon.Pun;
-using Photon.Realtime;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
@@ -23,7 +19,7 @@ public class PlayerManager : MonoBehaviour
 
     public OrbDetails getOrbDetails {  get { return OrbDetails; } }
 
-    AudioManager audioManager;
+    private AudioManager audioManager;
 
     private void Awake()
     {
@@ -66,7 +62,6 @@ public class PlayerManager : MonoBehaviour
                 GameManager.instance.GetOptionButtonsPlayer2[1].onClick.AddListener(delegate { ChangeTheOption(2); });
                 GameManager.instance.GetOptionButtonsPlayer2[2].onClick.AddListener(delegate { ChangeTheOption(3); });
                 GameManager.instance.GetOptionButtonsPlayer2[3].onClick.AddListener(delegate { OnClickReady(); });
-
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer1)
                 {
                     item.GetComponent<ButtonUtility>().enabled = false;
@@ -118,12 +113,15 @@ public class PlayerManager : MonoBehaviour
     [PunRPC]
     void RPC_SendThisToGameManager(int Playernum)
     {
-        if(Playernum == 1)
+        if (Playernum == 1)
+        {
             GameManager.instance.playerManager1 = this;
-        if(Playernum == 2)
+        }
+        if (Playernum == 2)
+        {
             GameManager.instance.playerManager2 = this;
+        }
     }
-
 
     [PunRPC]
     void RPC_ChangeTheOption(int num)

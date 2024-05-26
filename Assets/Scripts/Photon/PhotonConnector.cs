@@ -54,17 +54,20 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     }
 
+    public void MatchMakingTimerCompleted()
+    {
+        StartGame();
+    }
+
     public void StartGame()
     {
         if (PhotonNetwork.IsMasterClient)
-        {
+        { 
             PhotonNetwork.LoadLevel(1);
         }
     }
-
     void ConnectToPhoton()
     {
-        //MenuManager.instance.OpenMenuId(2);
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.ConnectUsingSettings();
     }
@@ -115,7 +118,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     {
         PlayerPrefs.SetString(nameKey, InputText.text);
 
-        PhotonNetwork.NickName = InputText.text;
+        PhotonNetwork.NickName = InputText.text + "_" + EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress();
         Debug.Log(PhotonNetwork.NickName);
     }
 
@@ -135,7 +138,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.JoinLobby();
         }
-        PhotonNetwork.NickName = nickName;
+        PhotonNetwork.NickName = nickName + "_" + EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress();
         Debug.Log(PhotonNetwork.NickName + " onConnet PhotonConnector-- NickName");
     }
     public override void OnJoinedLobby()
@@ -145,6 +148,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
             Debug.Log("You have connected to a Photon Lobby");
             OrbManager.instance.GetAllOrbDetails();
             MenuManager.instance.OpenMenuId(2);
+            MenuManager.instance.GetUserNFTs();
         }
         else
         {
@@ -155,7 +159,6 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     {
         base.OnDisconnected(cause);
         Debug.Log(cause);
-        //ConnectPhoton();
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -172,7 +175,6 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
             //MenuManager.instance.hintText.text = PhotonNetwork.CurrentRoom.PlayerCount + "/2 Starting Game";

@@ -63,10 +63,8 @@ public class TimerScript : MonoBehaviourPunCallbacks
 
     private void OnTimerRuns()
     {
-        MenuManager.instance.SetMatchFoundProperties("MATCH FOUND",Color.white,false);
+        MenuManager.instance.OnMatchFound();
         this.isTimerRunning = true;
-        MenuManager.instance.StopMatchMakingTimer();
-        PhotonConnector.instance.isRetryingMatch = false;
     }
 
     private void OnTimerEnds()
@@ -78,7 +76,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
         Debug.Log("OntimerEnd--->");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
-            PhotonConnector.instance.StartGame();
+            PhotonConnector.instance.MatchMakingTimerCompleted();
             return;
         }
         PhotonNetwork.LeaveRoom();

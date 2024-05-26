@@ -29,6 +29,10 @@ public class WarningPanel : MonoBehaviour
     [SerializeField] private Toggle sound;
     [SerializeField] private Toggle music;
 
+    [SerializeField] private TextMeshProUGUI userWalletAddressText;
+
+    private string userWalletAddress;
+
     private Vector3 initialPosition;
 
     private float warningShowFactor = 160f;
@@ -134,5 +138,15 @@ public class WarningPanel : MonoBehaviour
             EtherOrbManager.Instance.AudioManager.PlaySfx();
         else
             EtherOrbManager.Instance.AudioManager.StopSfxSound();
+    }
+
+    public void SetUserWallet(string walletAddress)
+    {
+        userWalletAddress = walletAddress;
+        userWalletAddressText.text = userWalletAddress;
+    }
+    public string GetUserWalletAddress()
+    {
+        return userWalletAddress;
     }
 }
