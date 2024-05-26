@@ -31,6 +31,8 @@ public class WarningPanel : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI userWalletAddressText;
 
+    private Button userAddressButton;
+
     private string userWalletAddress;
 
     private Vector3 initialPosition;
@@ -56,6 +58,10 @@ public class WarningPanel : MonoBehaviour
 
         eventManager = EventManager.Instance;
         eventManager.OnRematchTimerCompleted += RematchCancled;
+
+        userAddressButton = userWalletAddressText.GetComponent<Button>();
+
+        userAddressButton.onClick.AddListener(CopyUserAddress);
     }
     private void OnDestroy()
     {
@@ -148,5 +154,10 @@ public class WarningPanel : MonoBehaviour
     public string GetUserWalletAddress()
     {
         return userWalletAddress;
+    }
+    private void CopyUserAddress()
+    {
+        GUIUtility.systemCopyBuffer = userWalletAddress;
+        ShowWarning("Address Copied!");
     }
 }
