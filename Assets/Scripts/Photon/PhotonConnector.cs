@@ -159,6 +159,10 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     {
         base.OnDisconnected(cause);
         Debug.Log(cause);
+        if (isRetryingMatch)
+        {
+            ConnectPhoton();
+        }
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)

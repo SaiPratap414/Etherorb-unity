@@ -212,6 +212,8 @@ public class GameManager : MonoBehaviour
         UScores[1].text = "0";
         gameState = GameState.Nothing;
         GameOverPanel.SetActive(false);
+        DefeatPanel.SetActive(false);
+        VictoryPanel.SetActive(false);
         playerAScore = playerBScore = 0;
         warningPanel.HideWarning();
         warningPanel.HidePopUp();
@@ -628,24 +630,32 @@ public class GameManager : MonoBehaviour
         {
             EndPanelScore.text = GetPlayerScore(1).ToString("0");
             VictoryPanel.SetActive(playerAWon);
+
             AudioTag tag = playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
+
             DefeatPanel.SetActive(!playerAWon);
-            string winnerAddress = playerAWon ? userWallets[0] : userWallets[1];
-            Debug.Log("winnerAddress----> " + winnerAddress);
-            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name,winnerAddress);
+            ExecuteMatchComplete(playerAWon ? userWallets[0] : userWallets[1]);
         }
         if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
         {
             EndPanelScore.text = GetPlayerScore(2).ToString("0");
             VictoryPanel.SetActive(!playerAWon);
+
             AudioTag tag = !playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
-            DefeatPanel.SetActive(playerAWon);
 
-            string winnerAddress = playerAWon ? userWallets[0] : userWallets[1];
-            Debug.Log("winnerAddress----> " + winnerAddress);
-            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winnerAddress);
+            DefeatPanel.SetActive(playerAWon);
+            ExecuteMatchComplete(playerAWon ? userWallets[0] : userWallets[1]);
+        }
+    }
+
+    private void ExecuteMatchComplete(string winningAddress)
+    {
+        if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+        {
+            Debug.Log("winnerAddress----> " + winningAddress);
+            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winningAddress);
         }
     }
 

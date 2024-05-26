@@ -3455,8 +3455,7 @@ MonoBehaviour:
   pv: {fileID: 0}
   numberOfPlayerAFailedAttempt: 0
   numberOfPlayerBFailedAttempt: 0
-  player1Wallet: 
-  player2Wallet: 
+  userWallets: []
 --- !u!114 &835746839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3476,7 +3475,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents: []
-  sceneViewId: 1
+  sceneViewId: 2
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &835746840

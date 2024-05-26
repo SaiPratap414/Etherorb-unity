@@ -134,7 +134,8 @@ namespace ExitGames.Client.Photon
                                         {
                                             if (this.State != PhotonSocketState.Disconnected)
                                             {
-                                                this.Listener.DebugReturn(l, this.State + " " + s);
+                                                //this.Listener.DebugReturn(l, this.State + " " + s);
+                                                Debug.LogError("Tcp error occuured. Please Try again!");
                                             }
                                         };
 

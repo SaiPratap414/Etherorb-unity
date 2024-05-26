@@ -333,8 +333,11 @@ public class MenuManager : MonoBehaviour
     public void OnMatchFound()
     {
         SetMatchFoundProperties("MATCH FOUND", Color.white, false);
-        string roomId = PhotonNetwork.CurrentRoom.Name;
-        ApiManager.Instance.StartMatchWithNFT(roomId);
+        if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+        {
+            string roomId = PhotonNetwork.CurrentRoom.Name;
+            ApiManager.Instance.StartMatchWithNFT(roomId);
+        }
         StopMatchMakingTimer();
         PhotonConnector.instance.isRetryingMatch = false;
     }
