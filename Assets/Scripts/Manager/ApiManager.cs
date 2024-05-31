@@ -2,6 +2,8 @@ using System;
 using CI.HttpClient;
 using UnityEngine;
 using Photon.Pun;
+using System.Collections.Generic;
+using System.IO;
 
 public class ApiManager
 {
@@ -11,6 +13,8 @@ public class ApiManager
     private string baseURL = "https://helpless-octopus-49.telebit.io/";
 
     public UserModel userModel { get; private set; }
+
+    public NFTMeta nftMetaData = new NFTMeta();
 
     private string userWalletAdress;
 
@@ -43,6 +47,11 @@ public class ApiManager
                 else
                 {
                     MenuManager.instance.NFTScreen();
+                    Debug.Log("Nft count --->" + userModel.data.nfts.Count);
+                    foreach (var item in userModel.data.nfts)
+                    {
+                        GetAndSetNFTMetaData(item);
+                    }
                 }
             }
             else
@@ -108,5 +117,93 @@ public class ApiManager
             Debug.Log("CompleteMatchWithNFT ---> " + r.ReadAsString());
         });
     }
+
+    public void GetAndSetNFTMetaData(string nftId)
+    {
+        HttpClient client = new HttpClient();
+        string url = baseURL + $"metadata/{nftId}";
+        client.Get(new Uri(url), HttpCompletionOption.AllResponseContent, (r) =>
+        {
+            NFTMetaData metaData = JsonUtility.FromJson<NFTMetaData>(r.ReadAsString());
+            nftMetaData.OrbDetails.Add(metaData);
+
+        });
+    }
+
+    public void DownloadImage(string url,string savePath,Action<byte[]> onDownloadComplete)
+    {
+        HttpClient client = new HttpClient();
+        client.Get(new Uri(url), HttpCompletionOption.AllResponseContent, (r) =>
+        {
+            //TODO : Add save logic when you have id for meta data...
+            //saveImage(savePath, r.ReadAsByteArray());
+            //byte []imageData = LoadImage(savePath);
+            //GetSpite()
+            onDownloadComplete(r.ReadAsByteArray());
+        });
+    }
+
+    private void saveImage(string path, byte[] imageBytes)
+    {
+        //Create Directory if it does not exist
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+        }
+        try
+        {
+            File.WriteAllBytes(path, imageBytes);
+            Debug.Log("Saved Data to: " + path.Replace("/", "\\"));
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Failed To Save Data to: " + path.Replace("/", "\\"));
+            Debug.LogWarning("Error: " + e.Message);
+        }
+    }
+
+    public byte[] LoadImage(string path)
+    {
+        byte[] dataByte = null;
+
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Debug.LogWarning("Directory does not exist");
+            return null;
+        }
+
+        if (!File.Exists(path))
+        {
+            Debug.Log("File does not exist");
+            return null;
+        }
+        try
+        {
+            dataByte = File.ReadAllBytes(path);
+            Debug.Log("Loaded Data from: " + path.Replace("/", "\\"));
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Failed To Load Data from: " + path.Replace("/", "\\"));
+            Debug.LogWarning("Error: " + e.Message);
+        }
+        return dataByte;
+    }
+
+    public Sprite GetSpite(string fileName)
+    {
+        if (!File.Exists(fileName))
+        {
+            Debug.Log("File does not exist");
+            return null;
+        }
+        else
+        {
+            Texture2D texture2D = new Texture2D(2,2);
+            texture2D.LoadImage(LoadImage(fileName));
+            return Sprite.Create(texture2D, new Rect(0f, 0f, texture2D.width, texture2D.height), Vector2.zero);
+        }
+    }
+
 }
 

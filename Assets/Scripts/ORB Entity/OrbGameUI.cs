@@ -25,12 +25,13 @@ public class OrbGameUI : MonoBehaviour
         //StartCoroutine(Test());
     }
 
-    public void SetOrbStats(OrbDetails details)
+    public void SetOrbStats(NFTMetaData details)
     {
+        Debug.Log("Setting the orbs data--->");
         Orb_name.SetText(details.id);
-        Terra_num.SetText(details.Terra.ToString());
-        Torrent_num.SetText(details.Torrent.ToString());
-        Blaze_num.SetText(details.Blaze.ToString());
+        Terra_num.SetText(details.attributes.Terra.ToString());
+        Torrent_num.SetText(details.attributes.Torrent.ToString());
+        Blaze_num.SetText(details.attributes.Blaze.ToString());
     }
 
     public void SetParticleGameObject(string animation)

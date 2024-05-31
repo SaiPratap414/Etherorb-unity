@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class PlayfabConnet : MonoBehaviour
 {
+
+    private string matchHistoryKey = "MatchHistrory";
+    private string lastMatchIdKey = "LastMatchId";
+
     public static PlayfabConnet instance;
     [SerializeField] bool hasLogedIn = false;
     public bool GetHasLogedIn { get { return hasLogedIn; } }
@@ -13,12 +17,17 @@ public class PlayfabConnet : MonoBehaviour
     private string playerName;
     public string PlayerName { get { return playerName; } }
 
+    private string matchHistoriesData;
+    public MatchHistory matchHistories = new MatchHistory();
+
     private string walletAdd;
     public int totalScore;
 
     [SerializeField] int numOfGamesPlayed = 0;
 
     private EtherOrbManager etherOrbManager;
+
+    public string lastMatchId { get; private set; }
 
     private void Awake()
     {
@@ -177,8 +186,18 @@ public class PlayfabConnet : MonoBehaviour
 
         playerName = result.Data["PlayerName"].Value;
         walletAdd = result.Data["ADAWalletAddress"].Value;
-        int.TryParse(result.Data["TotalScore"].Value, out totalScore);
 
+        if (result.Data.ContainsKey(matchHistoryKey))
+        {
+            matchHistoriesData = result.Data[matchHistoryKey].Value;
+            matchHistories = JsonUtility.FromJson<MatchHistory>(matchHistoriesData);
+            Debug.Log("User Match History Count ---> " +matchHistories.userMatchHistories.Count);
+        }
+
+        if (result.Data.ContainsKey(lastMatchIdKey))
+            lastMatchId = result.Data[lastMatchIdKey].Value;
+
+        int.TryParse(result.Data["TotalScore"].Value, out totalScore);
         string gamesPlayed = result.Data["GamesPlayed"].Value;
         numOfGamesPlayed = int.Parse(gamesPlayed);
 
@@ -188,6 +207,10 @@ public class PlayfabConnet : MonoBehaviour
         Debug.Log(playerName + " Player name.");
         Debug.Log(walletAdd + " walletAddress.");
         Debug.Log(totalScore + " TotalScore.");
+
+        if (result.Data.ContainsKey(matchHistoryKey))
+            Debug.Log(matchHistoriesData + " MatchHistrory.");
+
         MenuManager.instance.OpenMenuId(4);
         PhotonConnector.instance.ConnectPhoton();
     }
@@ -226,6 +249,34 @@ public class PlayfabConnet : MonoBehaviour
             Data = new Dictionary<string, string>()
             {
                 {"GamesPlayed",  numOfGamesPlayed.ToString()}
+            }
+        };
+        PlayFabClientAPI.UpdateUserData(request, OnUpdateGamesPlayed, OnDataError);
+    }
+
+    public void UpdatePlayerHistory(UserMatchHistory userMatchHistory)
+    {
+        matchHistories.userMatchHistories.Add(userMatchHistory);
+        string userMatchHistoryJson = JsonUtility.ToJson(matchHistories);
+        Debug.Log("userMatchHistoryJson----> " + userMatchHistoryJson);
+        var request = new UpdateUserDataRequest()
+        {
+            Data = new Dictionary<string, string>()
+            {
+                {matchHistoryKey,  userMatchHistoryJson}
+            }
+        };
+        PlayFabClientAPI.UpdateUserData(request, OnUpdateGamesPlayed, OnDataError);
+    }
+
+    public void UpdateLastMatchId(string lastMatchIdValue)
+    {        
+        Debug.Log("UpdateLastMatchId ----> " + lastMatchIdValue);
+        var request = new UpdateUserDataRequest()
+        {
+            Data = new Dictionary<string, string>()
+            {
+                {lastMatchIdKey,  lastMatchIdValue}
             }
         };
         PlayFabClientAPI.UpdateUserData(request, OnUpdateGamesPlayed, OnDataError);

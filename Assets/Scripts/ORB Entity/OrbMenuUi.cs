@@ -29,15 +29,30 @@ public class OrbMenuUi : MonoBehaviour
         selectButton.onClick.AddListener(delegate { OnSelected(); });
     }
 
-    public void setObject(Sprite image64, string name, int Terra, int Torrent, int Blaze)
+    public void setObject(string imageUrl, string name, int Terra, int Torrent, int Blaze)
     {
-        Orb_image.sprite = image64;
+        //Orb_image.sprite = image64;
         Orb_name.text = name;
         Terra_num.text = Terra.ToString();
         Torrent_num.text = Torrent.ToString();
         Blaze_num.text = Blaze.ToString();
+
+        if(!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+            DownloadImage(imageUrl);
     }
 
+    private void DownloadImage(string url)
+    {
+        Debug.Log(url);
+        ApiManager.Instance.DownloadImage(url,string.Empty,OnDownLoadComplete);
+    }
+
+    private void OnDownLoadComplete(byte[] imageData)
+    {
+        Texture2D texture2D = new Texture2D(2, 2);
+        texture2D.LoadImage(imageData);
+        Orb_image.sprite = Sprite.Create(texture2D, new Rect(0f, 0f, texture2D.width, texture2D.height), Vector2.zero);
+    }
 
     public void SelectThisObject()
     {

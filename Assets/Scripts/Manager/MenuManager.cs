@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class MenuManager : MonoBehaviour
 {
@@ -50,6 +51,14 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject retryPanel;
     [SerializeField] private FindMatchMidPanel findMatchMidPanel;
 
+    [SerializeField] private VideoPlayer introVideo;
+
+    [SerializeField] private Button myOrbButton;
+    [SerializeField] private Button myStatsButton;
+
+    [SerializeField] private MyStats myStats;
+    [SerializeField] private GameObject myPanel;
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -63,29 +72,19 @@ public class MenuManager : MonoBehaviour
             Debug.Log("PhotonNetwork name -- " + PhotonNetwork.LocalPlayer.NickName);
         }
         addNFTButton.onClick.AddListener(AddNFT);
+        myOrbButton.onClick.AddListener(ShowMyOrbScreen);
+        myStatsButton.onClick.AddListener(ShowMyStatsScreen);
     }
 
     private void Start()
     {
-        //if (PlayerPrefs.HasKey(nameKey))
-        //{
-        //    nameInputField.text = PlayerPrefs.GetString(nameKey);
-        //}
-        //else
-        //{
-        //    nameInputField.text = "Player" + Random.Range(0, 1000).ToString("0000");
-        //}
-        //UserNameValueChange();
-
         audioManager = EtherOrbManager.Instance.AudioManager;
-
         audioManager.PlayAudio(AudioTag.BG);
 
         if (PlayfabConnet.instance.GetHasLogedIn)
         {
             nameText.text = PlayfabConnet.instance.PlayerName;
-            OrbManager.instance.GetAllOrbDetails();
-            OpenMenuId(2);
+            //OpenMenuId(2);
         }
         else if (UserPrefsManager.UserName !=string.Empty)
         {
@@ -95,7 +94,19 @@ public class MenuManager : MonoBehaviour
         else
         {
             OpenMenuId(0);
+            //introVideo.url = System.IO.Path.Combine(Application.streamingAssetsPath, "IntroVideo.mp4");
+            //StartCoroutine(LoadStartMenu());
         }
+    }
+
+    private IEnumerator LoadStartMenu()
+    {
+        yield return null;
+        introVideo.playOnAwake = true;
+        introVideo.Play();
+        yield return new WaitForSeconds(10);
+        introVideo.Stop();    
+        OpenMenuId(0);
     }
 
     private void Update()
@@ -224,6 +235,7 @@ public class MenuManager : MonoBehaviour
         }
         if (scene.buildIndex == 1)
         {
+            Debug.Log("Creating PlayerManager----->");
             PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity);
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
@@ -253,6 +265,7 @@ public class MenuManager : MonoBehaviour
         if (addr.Length < 3) return;
 
         EtherOrbManager.Instance.WarningPanel.SetUserWallet(addr);
+        GetUserNFTs();
         PlayfabConnet.instance.PlayFabLoginWithWalletId(addr);
     }
 
@@ -293,7 +306,17 @@ public class MenuManager : MonoBehaviour
         if(!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
             ApiManager.Instance.GetUserNFTs(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress());
     }
-
+    private void ShowMyOrbScreen()
+    {
+        myStats.gameObject.SetActive(false);
+        myPanel.SetActive(true);
+    }
+    private void ShowMyStatsScreen()
+    {
+        myStats.Init();
+        myPanel.SetActive(false);
+        myStats.gameObject.SetActive(true);
+    }
     #region OrbSpawning Ui
 
     public GameObject SpawnOrbUI()

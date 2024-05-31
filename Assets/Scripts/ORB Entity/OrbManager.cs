@@ -28,15 +28,12 @@ public class OrbList
     public List<OrbDetails> OrbDetails;
 }
 
-
-
-
 public class OrbManager : MonoBehaviour
 {
     public static OrbManager instance;
-    public OrbList OrbOwned;
+    public NFTMeta OrbOwned;
 
-    [SerializeField] OrbDetails selectedOrb;
+    [SerializeField] NFTMetaData selectedOrb;
     [SerializeField] GameObject prevSelectedOrb;
 
     [SerializeField] TextAsset temp;
@@ -50,34 +47,28 @@ public class OrbManager : MonoBehaviour
     {
         instance = this;
     }
-
-    void Update()
-    {
-        
-    }
-
-
-
     public void GetAllOrbDetails()
     {
-        OrbOwned.OrbDetails.Clear();
+        if(string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+            OrbOwned.OrbDetails.Clear();
+
         if (UiObjects.Count != 0)
         {
             foreach (GameObject obj in UiObjects) Destroy(obj);
         }
         UiObjects.Clear();
         sprites.Clear();
-        OrbOwned = JsonUtility.FromJson<OrbList>(temp.text);
+        OrbOwned = !string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()) ? ApiManager.Instance.nftMetaData : JsonUtility.FromJson<NFTMeta>(temp.text);
         selectedOrb = OrbOwned.OrbDetails[0];
         selectedIndex = 0;
         bool firstElement = true;
-        foreach (OrbDetails orb in OrbOwned.OrbDetails)
+        foreach (NFTMetaData orb in OrbOwned.OrbDetails)
         {
             GameObject obj = MenuManager.instance.SpawnOrbUI();
             UiObjects.Add(obj);
-            Sprite sprite = GetSprite(orb.image);
+            Sprite sprite = GetSprite(orb.image_url);
             sprites.Add(sprite);
-            obj.GetComponent<OrbMenuUi>().setObject(sprite, orb.id ,orb.Terra,orb.Torrent, orb.Blaze);
+            obj.GetComponent<OrbMenuUi>().setObject(orb.image_url, orb.id ,orb.attributes.Terra,orb.attributes.Torrent, orb.attributes.Blaze);
             if (firstElement) 
             {
                 obj.GetComponent<OrbMenuUi>().SelectThisObject();
@@ -112,7 +103,7 @@ public class OrbManager : MonoBehaviour
         return placeholder;
     }
 
-    public OrbDetails GetSelectedOrb()
+    public NFTMetaData GetSelectedOrb()
     {
         return selectedOrb;
     }
