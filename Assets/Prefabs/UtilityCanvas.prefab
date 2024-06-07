@@ -769,8 +769,7 @@ GameObject:
   - component: {fileID: 2596353359036055489}
   - component: {fileID: 6259078393604653178}
   - component: {fileID: 8358934898456513590}
-  - component: {fileID: 1785429140832398890}
-  - component: {fileID: 9023507295895613438}
+  - component: {fileID: 3698404363603400724}
   m_Layer: 5
   m_Name: TimerText
   m_TagString: Untagged
@@ -860,8 +859,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -895,7 +894,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &1785429140832398890
+--- !u!114 &3698404363603400724
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -904,38 +903,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1184267074144102084}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 202ee75aca1970d409e0297f0b4bfc94, type: 3}
+  m_Script: {fileID: 11500000, guid: 0afae563db3d64b79b1ddc381007d986, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TimerTxt: {fileID: 8358934898456513590}
-  inRound: 0
-  timerToStart: 0
-  fullRoundTimer: 0
-  maxRoundTime: 15
-  roundDone: 0
-  rematchTimer: 1
---- !u!114 &9023507295895613438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1184267074144102084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
+  timerText: {fileID: 8358934898456513590}
 --- !u!1 &1618850006806750846
 GameObject:
   m_ObjectHideFlags: 0
@@ -1312,7 +1283,7 @@ GameObject:
   - component: {fileID: 3998756114945264227}
   m_Layer: 5
   m_Name: UtilityCanvas
-  m_TagString: Untagged
+  m_TagString: UtilityCanvas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1424,7 +1395,7 @@ MonoBehaviour:
   popupRectTransform: {fileID: 3020609163958009569}
   yesButton: {fileID: 5061871888812704325}
   noButton: {fileID: 1830854214978483359}
-  timer: {fileID: 1785429140832398890}
+  timer: {fileID: 3698404363603400724}
   soundOn: {fileID: 21300000, guid: a62d0143703a24495a6211af683b85ed, type: 3}
   soundOff: {fileID: 21300000, guid: 13b10b156c4614df0932c24da6a89716, type: 3}
   musicOn: {fileID: 21300000, guid: 3398e63958a9a496cac8785d71e92ba1, type: 3}

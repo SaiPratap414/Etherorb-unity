@@ -75,6 +75,9 @@ public class UserMatchHistory
     public float reward;
     public string matchScore;
     public long timestamp;
+    public string orbImageUrl;
+    public string orbId;
+    public string aerValue;
 
     public string GetMatchStatus()
     {
@@ -116,7 +119,8 @@ public class UserMatchHistory
     public string GetTime()
     {
         DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(timestamp).ToLocalTime();
-        return dt.ToString("HH/mm").Replace("-", ":");
+        Debug.Log(dt.ToString("HH:mm"));
+        return dt.ToString("HH:mm");
     }
 }
 
@@ -140,7 +144,7 @@ public class MatchHistory
 
     public int totatDrawMatches { get { return userMatchHistories.FindAll(x => x.matchWon.Equals((int)MatchStatus.draw)).Count; } }
 
-    public float winRate { get { return (float)totalWinMatches / (float)totalGamesPlayed; } }
+    public float winRate { get { return (float)totalWinMatches *100 / (float)totalGamesPlayed; } }
 }
 
 [Serializable]
@@ -167,7 +171,7 @@ public class NFTMetaData
     public string image_url;
     public string id;
     public string animation_url;
-    public NFTAttributes attributes;
+    public NFTAttributes attributes = new NFTAttributes();
 
     public NFTMetaData(string id, string image, int terra, int torrent, int blaze)
     {

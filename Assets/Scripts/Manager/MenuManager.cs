@@ -56,8 +56,15 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private Button myOrbButton;
     [SerializeField] private Button myStatsButton;
 
+    private TextMeshProUGUI myStatText;
+    private TextMeshProUGUI myOrbText;
+
     [SerializeField] private MyStats myStats;
     [SerializeField] private GameObject myPanel;
+
+    [SerializeField] private Color deSelectedColor;
+
+    public ScreenSwipe screenSwipe;
 
     private void OnEnable()
     {
@@ -71,20 +78,27 @@ public class MenuManager : MonoBehaviour
         {
             Debug.Log("PhotonNetwork name -- " + PhotonNetwork.LocalPlayer.NickName);
         }
+
+        myStatText = myStatsButton.GetComponent<TextMeshProUGUI>();
+        myOrbText = myOrbButton.GetComponent<TextMeshProUGUI>();
+        myStatText.fontStyle = FontStyles.Underline;
         addNFTButton.onClick.AddListener(AddNFT);
         myOrbButton.onClick.AddListener(ShowMyOrbScreen);
         myStatsButton.onClick.AddListener(ShowMyStatsScreen);
+
+        ShowMyOrbScreen();
     }
 
     private void Start()
     {
         audioManager = EtherOrbManager.Instance.AudioManager;
         audioManager.PlayAudio(AudioTag.BG);
-
         if (PlayfabConnet.instance.GetHasLogedIn)
         {
             nameText.text = PlayfabConnet.instance.PlayerName;
-            //OpenMenuId(2);
+            OrbManager.instance.GetAllOrbDetails();
+            OpenMenuId(2);
+            StartCoroutine(LoadSelectedItem());
         }
         else if (UserPrefsManager.UserName !=string.Empty)
         {
@@ -94,19 +108,13 @@ public class MenuManager : MonoBehaviour
         else
         {
             OpenMenuId(0);
-            //introVideo.url = System.IO.Path.Combine(Application.streamingAssetsPath, "IntroVideo.mp4");
-            //StartCoroutine(LoadStartMenu());
         }
     }
 
-    private IEnumerator LoadStartMenu()
+    private IEnumerator LoadSelectedItem()
     {
         yield return null;
-        introVideo.playOnAwake = true;
-        introVideo.Play();
-        yield return new WaitForSeconds(10);
-        introVideo.Stop();    
-        OpenMenuId(0);
+        OrbManager.instance.SelectFirstObject();
     }
 
     private void Update()
@@ -176,7 +184,6 @@ public class MenuManager : MonoBehaviour
         stopMatch.SetActive(true);
         retryPanel.SetActive(false);
         OpenMenuId(3);
-        findMatchMidPanel.StartPanelMove();
         matchMaking.StartTimer();
         PhotonConnector.instance.FindMatch();
     }
@@ -184,6 +191,7 @@ public class MenuManager : MonoBehaviour
     {
         audioManager.PlayAudio(AudioTag.Button);
         OpenMenuId(2);
+        screenSwipe.RefreshContents();
         matchMaking.StopTimer();
         PhotonConnector.instance.StopSearch();
     }
@@ -195,6 +203,7 @@ public class MenuManager : MonoBehaviour
         matchMaking.StartTimer();
         PhotonConnector.instance.isRetryingMatch = true;
         PhotonConnector.instance.DisconnectPhoton();
+        SetMatchFoundProperties("FINDING MATCH", Color.black, true);
         retryPanel.SetActive(false);
         stopMatch.SetActive(true);
 
@@ -309,13 +318,25 @@ public class MenuManager : MonoBehaviour
     private void ShowMyOrbScreen()
     {
         myStats.gameObject.SetActive(false);
+        myStatText.fontStyle = FontStyles.Underline;
+        myOrbText.fontStyle = FontStyles.Normal;
+        myOrbText.color = Color.white;
+        myStatText.color = deSelectedColor;
         myPanel.SetActive(true);
+        myOrbButton.enabled = false;
+        myStatsButton.enabled = true;
     }
     private void ShowMyStatsScreen()
     {
         myStats.Init();
         myPanel.SetActive(false);
+        myStatText.fontStyle = FontStyles.Normal;
+        myOrbText.fontStyle = FontStyles.Underline;
+        myStatText.color = Color.white;
+        myOrbText.color = deSelectedColor;
         myStats.gameObject.SetActive(true);
+        myOrbButton.enabled = true;
+        myStatsButton.enabled = false;
     }
     #region OrbSpawning Ui
 

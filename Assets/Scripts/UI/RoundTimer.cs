@@ -24,8 +24,6 @@ public class RoundTimer : MonoBehaviour
 
     [SerializeField] private bool rematchTimer;
 
-
-
     void Start()
     {
         myPhotonView = GetComponent<PhotonView>();
@@ -90,7 +88,7 @@ public class RoundTimer : MonoBehaviour
                 TimerTxt.text = "";
                 if(rematchTimer)
                 {
-                    EventManager.Instance.OnRematchTimerCompletedInvoke();
+                    //EventManager.Instance.OnRematchTimerCompletedInvoke();
                 }
                 else
                 {
@@ -113,7 +111,6 @@ public class RoundTimer : MonoBehaviour
         fullRoundTimer = maxRoundTime;
         timerToStart = maxRoundTime;
         inRound = true;
-        Debug.Log("Timer has been reseted");
     }
 
     public void StopTimer()

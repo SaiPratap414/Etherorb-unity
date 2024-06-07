@@ -57,7 +57,7 @@ public class customButton : Editor
         TextRevealEffect myScript = (TextRevealEffect)target;
         if (GUILayout.Button("Play Effect"))
         {
-            //myScript.StartEffect();
+            //myScript.StartEffect("Text");
         }
     }
 

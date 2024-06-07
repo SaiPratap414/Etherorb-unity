@@ -1,10 +1,11 @@
 using Photon.Pun;
 using Photon.Realtime;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using PlayFab.ClientModels;
+using PlayFab;
 
 public class PhotonConnector : MonoBehaviourPunCallbacks
 {
@@ -17,8 +18,13 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     public bool isRetryingMatch = false;
 
     private string nameKey = "displayName";
+    public string roomNameKey = "roomName";
 
     ExitGames.Client.Photon.Hashtable _CustomRoomProprties = new ExitGames.Client.Photon.Hashtable();
+
+    private bool isPlayerRejoining = false;
+
+    private ApiManager apiManager;
 
     private void Awake()
     {
@@ -36,6 +42,8 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
             Destroy(this.gameObject);
         }
         DontDestroyOnLoad(this.gameObject);
+
+        apiManager = ApiManager.Instance;
     }
 
 
@@ -51,7 +59,6 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
         nickName = PlayfabConnet.instance.PlayerName;
         MenuManager.instance.nameText.text = nickName;
-
     }
 
     public void MatchMakingTimerCompleted()
@@ -146,14 +153,36 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
         if (!isRetryingMatch)
         {
             Debug.Log("You have connected to a Photon Lobby");
-            OrbManager.instance.GetAllOrbDetails();
-            MenuManager.instance.OpenMenuId(2);
-            MenuManager.instance.GetUserNFTs();
+
+            StartCoroutine(LoadMenu());
+            if(PlayerPrefs.HasKey(roomNameKey))
+            {
+                Debug.Log("Room exists--->" + PlayerPrefs.GetString(roomNameKey));
+                PhotonNetwork.JoinRoom(PlayerPrefs.GetString(roomNameKey));
+            }
         }
         else
         {
             FindMatch();
         }
+    }
+
+    private IEnumerator LoadMenu()
+    {
+        if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+        {
+            while (apiManager.userModel !=null && apiManager.userModel.success && apiManager.userModel.data != null
+                && apiManager.userModel.data.nfts.Count != apiManager.nftMetaData.OrbDetails.Count)
+            {
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        Debug.Log("nftMetaDatas---->" + ApiManager.Instance.nftMetaData.OrbDetails.Count);
+        OrbManager.instance.GetAllOrbDetails();
+        MenuManager.instance.OpenMenuId(2);
+        MenuManager.instance.screenSwipe.RefreshContents();
+        yield return null;
+        OrbManager.instance.SelectFirstObject();
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -176,6 +205,12 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
         Debug.Log("Could not Create Room ----- Retrying to create Room,  Message: " + message);
         MakeRoom();
     }
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        base.OnJoinRoomFailed(returnCode, message);
+        PlayerPrefs.DeleteKey(roomNameKey);
+        Debug.Log("match already finished--->" + message);
+    }
 
     public override void OnJoinedRoom()
     {
@@ -189,7 +224,7 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     {
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
-            GameManager.instance.GameFailedExit();
+            Debug.Log("Player left the room--->");
         }
         else
         {
@@ -203,6 +238,16 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
         {
             //TimerScript.instance.TimeRpc();
             MenuManager.instance.countdownTimer.StartTimer();
+        }
+
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            if(GameManager.instance!=null)
+            {
+                Debug.Log("Rejoin Player --->" + newPlayer.NickName);
+                //TODO :- Need to change the logic for the ReConnect...
+                //GameManager.instance.ReJoinPlayer(newPlayer);
+            }
         }
 
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2 && PhotonNetwork.IsMasterClient)

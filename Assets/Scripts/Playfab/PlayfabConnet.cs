@@ -3,6 +3,7 @@ using PlayFab;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class PlayfabConnet : MonoBehaviour
 {
@@ -374,6 +375,14 @@ public class PlayfabConnet : MonoBehaviour
 
     }
 
+    public void FetchServerTime(Action<GetTimeResult> onSuccess,Action<PlayFabError> onError)
+    {
+        PlayFabClientAPI.GetTime(
+            new GetTimeRequest(),
+            onSuccess,
+            onError
+        );
+    }
     #endregion
 
 

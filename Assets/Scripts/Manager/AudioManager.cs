@@ -71,27 +71,39 @@ public class AudioManager : MonoBehaviour
     }
     public void StopMusic()
     {
-        bgSource.Stop();
-        bgSource.enabled = false;
+        if (bgSource != null)
+        {
+            bgSource.Stop();
+            bgSource.enabled = false;
+        }
     }
     public void StopSfxSound()
     {
-        sfxSource.Stop();
-        timerSource.Stop();
-        sfxSource.enabled = false;
-        timerSource.enabled = false;
+        if (sfxSource != null && timerSource != null)
+        {
+            sfxSource.Stop();
+            timerSource.Stop();
+            sfxSource.enabled = false;
+            timerSource.enabled = false;
+        }
     }
 
     public void PlayMusic()
     {
-        bgSource.enabled = true;
-        bgSource.Play();
+        if (bgSource != null)
+        {
+            bgSource.enabled = true;
+            bgSource.Play();
+        }
     }
     public void PlaySfx()
     {
-        sfxSource.enabled = true;
-        timerSource.enabled = true;
-        sfxSource.Play();
-        timerSource.Play();
+        if (sfxSource != null && timerSource != null)
+        {
+            sfxSource.enabled = true;
+            timerSource.enabled = true;
+            sfxSource.Play();
+            timerSource.Play();
+        }
     }
 }

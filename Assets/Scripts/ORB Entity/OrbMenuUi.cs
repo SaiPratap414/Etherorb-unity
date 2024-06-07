@@ -20,7 +20,7 @@ public class OrbMenuUi : MonoBehaviour
     [SerializeField] Color selectedColor;
     [SerializeField] Color deSelectedColor;
 
-    private Vector3 selectedScale = new Vector3(1.06f, 1.06f, 1.06f);
+    private Vector3 selectedScale = new Vector3(1.05f, 1.05f, 1.05f);
 
     bool isSelected = false;
 

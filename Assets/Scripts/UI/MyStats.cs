@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class MyStats : MonoBehaviour
 {
@@ -26,10 +25,15 @@ public class MyStats : MonoBehaviour
 
     [SerializeField] private GameObject noGamesPanel;
 
-    private MatchHistory matchHistory; 
+    private MatchHistory matchHistory;
+    private bool isInitialized = false;
 
    public void Init()
     {
+        if (isInitialized)
+            return;
+
+        isInitialized = true;
         matchHistory = PlayfabConnet.instance.matchHistories;
         userName.text = PlayfabConnet.instance.PlayerName;
         userWallet.text = EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress();
@@ -46,9 +50,11 @@ public class MyStats : MonoBehaviour
         currencyWon.text = $"+{matchHistory.totalWinMatches} $ORBS";
         currencyLoss.text = $"-{matchHistory.totatLossMatches} $ORBS";
 
+        matchHistory.userMatchHistories = matchHistory.userMatchHistories.OrderByDescending(x => x.timestamp).ToList();
+
         foreach (UserMatchHistory matchHistory in matchHistory.userMatchHistories)
         {
-            RoundItem item = Instantiate(roundItem,roundsParent);
+            RoundItem item = Instantiate(roundItem, roundsParent);
             item.Init(matchHistory);
         }
         noGamesPanel.SetActive(matchHistory.userMatchHistories.Count == 0);

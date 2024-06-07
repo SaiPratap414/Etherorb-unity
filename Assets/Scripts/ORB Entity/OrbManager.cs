@@ -52,6 +52,8 @@ public class OrbManager : MonoBehaviour
         if(string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
             OrbOwned.OrbDetails.Clear();
 
+        Debug.Log("GetAllOrbDetails---->");
+
         if (UiObjects.Count != 0)
         {
             foreach (GameObject obj in UiObjects) Destroy(obj);
@@ -59,23 +61,22 @@ public class OrbManager : MonoBehaviour
         UiObjects.Clear();
         sprites.Clear();
         OrbOwned = !string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()) ? ApiManager.Instance.nftMetaData : JsonUtility.FromJson<NFTMeta>(temp.text);
+        Debug.Log("OrbOwned---->" + OrbOwned.OrbDetails.Count);
         selectedOrb = OrbOwned.OrbDetails[0];
         selectedIndex = 0;
-        bool firstElement = true;
         foreach (NFTMetaData orb in OrbOwned.OrbDetails)
         {
             GameObject obj = MenuManager.instance.SpawnOrbUI();
             UiObjects.Add(obj);
             Sprite sprite = GetSprite(orb.image_url);
             sprites.Add(sprite);
-            obj.GetComponent<OrbMenuUi>().setObject(orb.image_url, orb.id ,orb.attributes.Terra,orb.attributes.Torrent, orb.attributes.Blaze);
-            if (firstElement) 
-            {
-                obj.GetComponent<OrbMenuUi>().SelectThisObject();
-                firstElement = false;
-            }
-
+            obj.GetComponent<OrbMenuUi>().setObject(orb.image_url, orb.id, orb.attributes.Terra, orb.attributes.Torrent, orb.attributes.Blaze);
         }
+    }
+
+    public void SelectFirstObject()
+    {
+        UiObjects[0].GetComponent<OrbMenuUi>().SelectThisObject();
     }
 
     public void SetSelectedOrb(string name, GameObject obj)

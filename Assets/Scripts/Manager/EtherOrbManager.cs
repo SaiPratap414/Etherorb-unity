@@ -15,8 +15,13 @@ public class EtherOrbManager : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
-        DontDestroyOnLoad(this);
+        if (instance == null) instance = this;
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        DontDestroyOnLoad(gameObject);
     }
 
 }

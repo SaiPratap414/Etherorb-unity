@@ -1,6 +1,7 @@
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
-
+using System.Collections;
 public class PlayerManager : MonoBehaviour
 {
     PhotonView pv;
@@ -12,12 +13,12 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] int TotalScore = 0;
     [SerializeField] OrbGameUI gameUI;
 
-    OrbDetails OrbDetails;
-    public int TerraValue { get { return OrbDetails.Terra; } }
-    public int TorrentValue { get { return OrbDetails.Torrent; } }
-    public int BlazeValue { get { return OrbDetails.Blaze; } }
+    NFTMetaData OrbDetails;
+    public int TerraValue { get { return OrbDetails.attributes.Terra; } }
+    public int TorrentValue { get { return OrbDetails.attributes.Torrent; } }
+    public int BlazeValue { get { return OrbDetails.attributes.Blaze; } }
 
-    public OrbDetails getOrbDetails {  get { return OrbDetails; } }
+    public NFTMetaData getOrbDetails {  get { return OrbDetails; } }
 
     private AudioManager audioManager;
 
@@ -26,15 +27,27 @@ public class PlayerManager : MonoBehaviour
         pv = GetComponent<PhotonView>();
         ActorNum = pv.OwnerActorNr;
     }
-
+    public void SetActorNum(int num,Player player)
+    {
+        pv = GetComponent<PhotonView>();
+        pv.OwnerActorNr = ActorNum = num;
+        pv.OwnershipTransfer = OwnershipOption.Request;
+        pv.TransferOwnership(player);
+        
+    }
     private void Start()
     {
         audioManager = EtherOrbManager.Instance.AudioManager;
-        gameUI = pv.OwnerActorNr == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
+        gameUI = pv.OwnerActorNr % 2 == 1 ? GameManager.instance.GetPlayerOrb1 : GameManager.instance.GetPlayerOrb2;
+        if (!GameManager.instance.isPlayerRejoining)
+            Initialize();
+    }
 
+    public void Initialize()
+    {
         if (pv.IsMine)
         {
-            if(ActorNum == 1)
+            if (ActorNum % 2 == 1)
             {
                 GameManager.instance.GetOptionButtonsPlayer1[0].onClick.AddListener(delegate { ChangeTheOption(1); });
                 GameManager.instance.GetOptionButtonsPlayer1[1].onClick.AddListener(delegate { ChangeTheOption(2); });
@@ -44,9 +57,11 @@ public class PlayerManager : MonoBehaviour
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer2)
                 {
                     item.GetComponent<ButtonUtility>().enabled = false;
+                    item.interactable = false;
                 }
+                GameManager.instance.GetOptionButtonsPlayer2[3].gameObject.SetActive(false);
             }
-            else if (ActorNum == 2)
+            else if (ActorNum % 2 == 0)
             {
                 //align object 2 left and object 1 to right
                 Vector3 player1Pos = GameManager.instance.GetPlayerOrb1.transform.position;
@@ -65,16 +80,23 @@ public class PlayerManager : MonoBehaviour
                 foreach (var item in GameManager.instance.GetOptionButtonsPlayer1)
                 {
                     item.GetComponent<ButtonUtility>().enabled = false;
+                    item.interactable = false;
                 }
+                GameManager.instance.GetOptionButtonsPlayer1[3].gameObject.SetActive(false);
             }
-            
+
             OrbDetails = OrbManager.instance.GetSelectedOrb();
-            pv.RPC(nameof(RPC_OrbStatSync), RpcTarget.OthersBuffered, OrbDetails.id, OrbDetails.image, OrbDetails.Terra, OrbDetails.Torrent, OrbDetails.Blaze);
+            pv.RPC(nameof(RPC_OrbStatSync), RpcTarget.OthersBuffered, OrbDetails.id, OrbDetails.image_url, OrbDetails.attributes.Terra, OrbDetails.attributes.Torrent, OrbDetails.attributes.Blaze);
             pv.RPC(nameof(RPC_SendThisToGameManager), RpcTarget.All, ActorNum);
         }
-        GameManager.instance.SetPlayerReady(ActorNum);
+        StartCoroutine(SetReadyPlayer());
     }
 
+    private IEnumerator SetReadyPlayer()
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameManager.instance.SetPlayerReady(ActorNum);
+    }
 
     private void Update()
     {
@@ -113,12 +135,14 @@ public class PlayerManager : MonoBehaviour
     [PunRPC]
     void RPC_SendThisToGameManager(int Playernum)
     {
-        if (Playernum == 1)
+        if (Playernum%2 == 1)
         {
+            Debug.Log("RPC_SendThisToGameManager---> "+ Playernum);
             GameManager.instance.playerManager1 = this;
         }
-        if (Playernum == 2)
+        else
         {
+            Debug.Log("RPC_SendThisToGameManager---> " + Playernum);
             GameManager.instance.playerManager2 = this;
         }
     }
@@ -126,6 +150,7 @@ public class PlayerManager : MonoBehaviour
     [PunRPC]
     void RPC_ChangeTheOption(int num)
     {
+        Debug.Log("RPC_ChangeTheOption---->"+ num);
         GameManager.instance.SaveAndPlayChoices(num, pv.OwnerActorNr);
     }
 
@@ -139,7 +164,7 @@ public class PlayerManager : MonoBehaviour
     [PunRPC]
     void RPC_OrbStatSync(string id, string image, int terra, int torrent, int blaze)
     {
-        OrbDetails = new OrbDetails(id,image, terra, torrent, blaze);
+        OrbDetails = new NFTMetaData(id,image, terra, torrent, blaze);
     }
 
 

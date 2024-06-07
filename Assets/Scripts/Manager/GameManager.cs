@@ -1,5 +1,7 @@
 using Photon.Pun;
 using Photon.Realtime;
+using PlayFab;
+using PlayFab.ClientModels;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -175,6 +177,14 @@ public class GameManager : MonoBehaviour
 
     public List<string> userWallets = new List<string>();
 
+    ExitGames.Client.Photon.Hashtable _CustomRoomProprties = new ExitGames.Client.Photon.Hashtable();
+
+    private string currentRoundKey = "'currentRound";
+
+    public bool isPlayerRejoining = false;
+
+    private UserMatchHistory userMatchHistory = new UserMatchHistory();
+
     private void Awake()
     {
         instance = this;
@@ -197,11 +207,50 @@ public class GameManager : MonoBehaviour
 
         homeButton.onClick.AddListener(LeaveGame);
         reMatchButton.onClick.AddListener(SendRematchRequest);
+
+        _CustomRoomProprties.Clear();
     }
     private void Start()
     {
         warningPanel = EtherOrbManager.Instance.WarningPanel;
         audioManager = EtherOrbManager.Instance.AudioManager;
+
+        if (PlayerPrefs.HasKey(PhotonConnector.instance.roomNameKey))
+        {
+            Debug.Log("Loading game scene Room exists--->" + PlayerPrefs.GetString(PhotonConnector.instance.roomNameKey));
+            int currentRound = (int)PhotonNetwork.CurrentRoom.CustomProperties[currentRoundKey];
+            Debug.Log("current Round ---> " + currentRound);
+
+            for(int i=1; i<=currentRound;i++)
+            {
+                Debug.Log((string)PhotonNetwork.CurrentRoom.CustomProperties["Round" + i]);
+            }
+
+            isPlayer1R = isPlayer2R =true;
+        }
+
+        //TODO :- Need to change the logic for the ReConnect...
+        //PlayerPrefs.SetString(PhotonConnector.instance.roomNameKey, PhotonNetwork.CurrentRoom.Name);
+        //PlayfabConnet.instance.UpdateLastMatchId(PhotonNetwork.CurrentRoom.Name);
+        //PlayerPrefs.Save();
+    }
+
+    public void ReJoinPlayer(Player player)
+    {
+        GameObject playerManager = PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity);
+        isPlayerRejoining = true;
+        if (playerManager1 ==null)
+        {
+            Debug.Log("ReJoinPlayer playerManager1---->");
+            playerManager1 = playerManager.GetComponent<PlayerManager>();
+            playerManager1.SetActorNum(1,player);
+        }
+        else if(playerManager2==null)
+        {
+            Debug.Log("ReJoinPlayer playerManager2---->");
+            playerManager2 = playerManager.GetComponent<PlayerManager>();
+            playerManager2.SetActorNum(2,player);
+        }
     }
 
     private void ResetUIForRematch()
@@ -294,14 +343,16 @@ public class GameManager : MonoBehaviour
 
     public void RevealChoices()
     {
+        //Debug.Log("RevealChoices---->");
         SetParticleGameObject(GetOrbAnimationName[currentPlay.playerA], 1);
         SetParticleGameObject(GetOrbAnimationName[currentPlay.playerB], 2);
     }
 
     public void SaveChoices(int choice, int ActorNumber)
     {
-        if (ActorNumber == 1) currentPlay.playerA = choice;
-        if (ActorNumber == 2) currentPlay.playerB = choice;
+        //Debug.Log("SaveAndPlayChoices---->" + choice + "--->ActorNumber " + ActorNumber);
+        if (ActorNumber %2 == 1) currentPlay.playerA = choice;
+        if (ActorNumber %2 == 0) currentPlay.playerB = choice;
     }
 
     IEnumerator CalculatePlay()
@@ -471,19 +522,44 @@ public class GameManager : MonoBehaviour
     IEnumerator GameResultSequence(bool PlayerAWon, bool isDraw)
     {
         AnnouncerDesc.SetText(string.Empty);
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
+        string roundKey = "Round" + roundNum;
+        if (PhotonNetwork.LocalPlayer.ActorNumber  %2 == 1)
         {
             if (PlayerAWon && !isDraw)
             {
                 yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorA, impactAnimatorB,playerOrb2));
+
+                if (!_CustomRoomProprties.ContainsKey(roundKey))
+                    _CustomRoomProprties.Add(roundKey, PhotonNetwork.NickName);
+
+                if (!_CustomRoomProprties.ContainsKey(currentRoundKey))
+                    _CustomRoomProprties.Add(currentRoundKey, roundNum);
+
+                _CustomRoomProprties[currentRoundKey] = roundNum;
+
+                Debug.Log("_CustomRoomProprties ----> " + _CustomRoomProprties[currentRoundKey]);
+
+                PhotonNetwork.CurrentRoom.SetCustomProperties(_CustomRoomProprties);
             }
             else if(!PlayerAWon && !isDraw)
             {
                 yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorB, impactAnimatorA,playerOrb1));
             }
+            else if(isDraw)
+            {
+                if (!_CustomRoomProprties.ContainsKey(roundKey))
+                    _CustomRoomProprties.Add(roundKey, "draw");
+
+                if (!_CustomRoomProprties.ContainsKey(currentRoundKey))
+                    _CustomRoomProprties.Add(currentRoundKey, roundNum);
+
+                _CustomRoomProprties[currentRoundKey] = roundNum;
+                Debug.Log("_CustomRoomProprties----> " + _CustomRoomProprties[currentRoundKey]);
+                PhotonNetwork.CurrentRoom.SetCustomProperties(_CustomRoomProprties);
+            }
         }
 
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 0)
         {
             if (PlayerAWon && !isDraw)
             {
@@ -492,6 +568,14 @@ public class GameManager : MonoBehaviour
             else if (!PlayerAWon && !isDraw)
             {
                 yield return StartCoroutine(ExecuteAnimationSequence(zapAnimatorB, impactAnimatorA,playerOrb1));
+                _CustomRoomProprties.Add(roundKey, PhotonNetwork.NickName);
+                if (!_CustomRoomProprties.ContainsKey(currentRoundKey))
+                    _CustomRoomProprties.Add(currentRoundKey, roundNum);
+
+                _CustomRoomProprties[currentRoundKey] = roundNum;
+
+                Debug.Log("_CustomRoomProprties----> " + _CustomRoomProprties[currentRoundKey]);
+                PhotonNetwork.CurrentRoom.SetCustomProperties(_CustomRoomProprties);
             }
         }
 
@@ -518,7 +602,8 @@ public class GameManager : MonoBehaviour
         LostAnimationName lostVFX = gameConfig.lostAnimationNames.Find(x => x.type.Equals(cardLost));
         imapct.gameObject.SetActive(true);
         imapct.enabled = true;
-        imapct.Play(winVFX.impactAnimationName);
+        if(winVFX !=null)
+            imapct.Play(winVFX.impactAnimationName);
         if(lostVFX!=null)
             orbGameUI.SetParticleGameObject(lostVFX.lostAnimationName);
         yield return new WaitForSeconds(0.517f);
@@ -578,7 +663,8 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
         yield return new WaitForSeconds(1f);
         roundNum++;
-        if(numberOfBothPlayerFailedAttempt>=2)
+        
+        if (numberOfBothPlayerFailedAttempt>=2)
         {
             gameState = GameState.GameEnd;
         }
@@ -598,7 +684,10 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Nothing;
         gameCompleted = true;
         yield return new WaitForSeconds(1.5f);
+        reMatchButton.interactable = true;
         GameOverPanel.SetActive(true);
+        PlayerPrefs.DeleteKey(PhotonConnector.instance.roomNameKey);
+        isPlayerRejoining = false;
         CalculateWinLoss();
         PlayfabConnet.instance.UpdateGamesPlayed();
     }
@@ -626,7 +715,7 @@ public class GameManager : MonoBehaviour
             sendScoreForPlayers(2, 10);
         }
 
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 1)
         {
             EndPanelScore.text = GetPlayerScore(1).ToString("0");
             VictoryPanel.SetActive(playerAWon);
@@ -637,7 +726,7 @@ public class GameManager : MonoBehaviour
             DefeatPanel.SetActive(!playerAWon);
             ExecuteMatchComplete(playerAWon ? userWallets[0] : userWallets[1]);
         }
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 0)
         {
             EndPanelScore.text = GetPlayerScore(2).ToString("0");
             VictoryPanel.SetActive(!playerAWon);
@@ -673,7 +762,7 @@ public class GameManager : MonoBehaviour
 
     void spawnlastPlayUi(bool playerAWon,bool isDraw)
     {
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        if (PhotonNetwork.LocalPlayer.ActorNumber %2== 1) // 1 is Player A
         {
             GameObject uiA = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
             uiA.GetComponent<RoundUI>().SetUpRoundUI(playerAWon,isDraw);
@@ -691,7 +780,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2) 
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 0) 
         {
             GameObject uiB = Instantiate(lastPlayUiPrefab, roundHistoryPlayer.transform);
             uiB.GetComponent<RoundUI>().SetUpRoundUI(!playerAWon,isDraw);
@@ -721,9 +810,9 @@ public class GameManager : MonoBehaviour
     void RPC_SendMatchRematchRequest(int playernum)
     {
         reMatchButton.interactable = false;
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 1) // 1 is Player A
         {
-            if(playernum ==1)
+            if(playernum %2 ==1)
             {
                 //Show loading...
                 warningPanel.ShowWarning("rematching to the player...", true);
@@ -734,9 +823,9 @@ public class GameManager : MonoBehaviour
                 warningPanel.ShowPopup();
             }
         }
-        else if (PhotonNetwork.LocalPlayer.ActorNumber == 2) // 1 is Player A
+        else if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 0) // 1 is Player A
         {
-            if(playernum==2)
+            if(playernum %2 ==0)
             {
                 warningPanel.ShowWarning("rematching to the player...", true);
             }
@@ -766,7 +855,7 @@ public class GameManager : MonoBehaviour
     }
     public void ReMatchAcceptance()
     {
-        pv.RPC(nameof(RPC_SendMatchRematchAccept), RpcTarget.AllBuffered);
+        pv.RPC(nameof(RPC_SendMatchRematchAccept), RpcTarget.All);
     }
     [PunRPC]
     void RPC_SendMatchRematchAccept()
@@ -781,7 +870,24 @@ public class GameManager : MonoBehaviour
     public void LeaveGame()
     {
         audioManager.PlayAudio(AudioTag.Button);
+        pv.RPC(nameof(RPC_LeaveRoom), RpcTarget.OthersBuffered);
+        StartCoroutine(LoadMenu());
+    }
+
+    [PunRPC]
+    void RPC_LeaveRoom()
+    {
         PhotonNetwork.LeaveRoom();
+        reMatchButton.interactable = false;
+        Debug.Log("Player left the game...");
+        EtherOrbManager.Instance.WarningPanel.ShowWarning("Player left the game...");
+    }
+
+    private IEnumerator LoadMenu()
+    {
+        PhotonNetwork.LeaveRoom();
+        yield return new WaitUntil(() => !PhotonNetwork.InRoom);
+        Debug.Log("Leaving Room --->");
         PhotonNetwork.LoadLevel(0);
     }
     public void GameFailedExit()
@@ -802,7 +908,7 @@ public class GameManager : MonoBehaviour
 
     public int GetPlayerScore(int player)
     {
-        if (player == 1)
+        if (player%2 == 1)
         {
             return playerAScore;
         }
@@ -814,14 +920,58 @@ public class GameManager : MonoBehaviour
 
     void sendScoreForPlayers(int player1, int player2)
     {
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
+        if (PhotonNetwork.LocalPlayer.ActorNumber%2 == 1)
         {
             PlayfabConnet.instance.addtoPlayerTotalScore(player1);
+            SetAndSendResultData(playerAScore, playerBScore);
         }
-        if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
+        if (PhotonNetwork.LocalPlayer.ActorNumber %2== 0)
         {
             PlayfabConnet.instance.addtoPlayerTotalScore(player2);
+            SetAndSendResultData(playerBScore, playerAScore);
         }
+    }
+
+    private void SetAndSendResultData(int score1, int score2)
+    {
+        string matchScore = score1 + "-" + score2;
+        int matchWon = (score1 == score2)  ? (int)MatchStatus.draw : score1 > score2 ? (int)MatchStatus.win : (int)MatchStatus.loss;
+        float reward = score1 > score2 ? +1f : -1f;
+        SendMatchHistory(matchScore, matchWon, reward);
+    }
+
+    private void SendMatchHistory(string matchScore,int matchWon,float reward)
+    {
+        userMatchHistory.matchId = PhotonNetwork.CurrentRoom.Name;
+        userMatchHistory.matchWon = matchWon;
+        userMatchHistory.matchScore = matchScore;
+        userMatchHistory.wageredAmount = 1;
+        userMatchHistory.reward = reward;
+        userMatchHistory.orbId = string.Empty; 
+        userMatchHistory.orbImageUrl = string.Empty;
+        PlayfabConnet.instance.FetchServerTime(OnServerTimeSuccess, OnServerTimeFailure);
+    }
+
+    private void OnServerTimeSuccess(GetTimeResult result)
+    {
+        // Server timestamp retrieved successfully
+        long unixTimestamp = (long)result.Time.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        Debug.Log("Unix timestamp: " + unixTimestamp);
+        userMatchHistory.timestamp = unixTimestamp;
+
+        //PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
+    }
+
+    private void OnServerTimeFailure(PlayFabError error)
+    {
+        // Failed to retrieve server timestamp
+        Debug.LogError("Error fetching server time: " + error.ErrorMessage);
+
+        DateTime currentTime = DateTime.UtcNow;
+        long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
+        userMatchHistory.timestamp = unixTime;
+
+        //PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
     }
 
     void GenerateRandomOption()
@@ -863,6 +1013,7 @@ public class GameManager : MonoBehaviour
     {
         try
         {
+            Debug.Log("SyncPlayerData---->");
             playerOrb1.SetOrbStats(playerManager1.getOrbDetails);
             playerOrb2.SetOrbStats(playerManager2.getOrbDetails);
         }
@@ -874,7 +1025,7 @@ public class GameManager : MonoBehaviour
 
     public void SetSelectedStatesForButton(int index,int player)
     {
-        if(player ==1)
+        if(player%2 ==1)
         {
             ShowOrDeSelectButtons(GetOptionButtonsPlayer1);
             GetOptionButtonsPlayer1[index - 1].GetComponent<ButtonUtility>().SelectedStateAction();
@@ -892,10 +1043,9 @@ public class GameManager : MonoBehaviour
 
     public void SetParticleGameObject(string animationName,int ActorNumber)
     {
-        if (ActorNumber == 1)
+        if (ActorNumber%2 == 1)
             playerOrb1.SetParticleGameObject(animationName);
-
-        if (ActorNumber == 2)
+        else 
             playerOrb2.SetParticleGameObject(animationName);
     }
     private void ResetOrbImages()
@@ -912,6 +1062,17 @@ public class GameManager : MonoBehaviour
             item.gameObject.SetActive(show);
             item.GetComponent<ButtonUtility>().DeSelectState();
         }
+
+        if(PhotonNetwork.LocalPlayer.ActorNumber %2==1)
+        {
+            //player 1 --- Hiding Ready button for player2...
+            GetOptionButtonsPlayer2[3].gameObject.SetActive(false);
+        }
+        else
+        {
+            //player 2 --- Hiding Ready button for player1...
+            GetOptionButtonsPlayer1[3].gameObject.SetActive(false);
+        }
     }
     private void ClearUIForResult(bool show)
     {
@@ -921,10 +1082,12 @@ public class GameManager : MonoBehaviour
     }
     public void SetPlayerReady(int playerNum)
     {
-        if(playerNum == 1)
+        if(playerNum %2 == 1)
             isPlayer1R = true;
-        if(playerNum == 2)
+        else
             isPlayer2R = true;
+
+        Debug.Log("SetPlayerReady--->" + isPlayer1R + "  ---> isPlayer2R " + isPlayer2R);
     }
 
     private string GenerateAnnouncerDescString(PlayTrun turn) => (turn.playerA, turn.playerB) switch
@@ -940,6 +1103,12 @@ public class GameManager : MonoBehaviour
         (1, 2) or (2, 1) => "TERRA BEATS TORRENT",
         (2, 3) or (3, 2) => "TORRENT BEATS BLAZE",
         (3, 1) or (1, 3) => "BLAZE BEATS TERRA",
+        (0, 1) or (1, 0) => "TERRA WON",
+        (0, 2) or (2, 0) => "TORRENT WON",
+        (0, 3) or (3, 0) => "BLAZE WON",
+        (1,1) => playerManager1.TerraValue != playerManager2.TerraValue ? "TERRA WON" : "ITS A TIE",
+        (2, 2) => playerManager1.TerraValue != playerManager2.TerraValue ? "TORRENT WON" : "ITS A TIE",
+        (3, 3) => playerManager1.TerraValue != playerManager2.TerraValue ? "BLAZE WON" : "ITS A TIE",
         _ => "ITS A TIE",
     };
 
@@ -977,6 +1146,21 @@ public class GameManager : MonoBehaviour
                 cardLost = CardType.NONE;
                 vfxTag = AudioTag.BLAZE;
                 break;
+            case (1, 1):
+                cardWon = CardType.TERRA;
+                cardLost = CardType.TERRA;
+                vfxTag = AudioTag.TERRA;
+                break;
+            case (2, 2):
+                cardWon = CardType.TORRENT;
+                cardLost = CardType.TORRENT;
+                vfxTag = AudioTag.TORRENT;
+                break;
+            case (3, 3):
+                cardWon = CardType.BLAZE;
+                cardLost = CardType.BLAZE;
+                vfxTag = AudioTag.BLAZE;
+                break;
             default:
                 cardWon = CardType.NONE;
                 cardLost = CardType.NONE;
@@ -986,7 +1170,7 @@ public class GameManager : MonoBehaviour
     }
     private void SetAnnouncerHeader(bool PlayerAWon,bool isDraw)
     {
-        if(PhotonNetwork.LocalPlayer.ActorNumber == 1) // 1 is Player A
+        if(PhotonNetwork.LocalPlayer.ActorNumber%2 == 1) // 1 is Player A
         {
             AnnouncerHeader.text = isDraw ? "ITS A TIE" : PlayerAWon ? "YOU WON" : "YOU LOSE";
             AnnouncerHeader.color = isDraw ? Color.white : PlayerAWon ? gameConfig.winColor : gameConfig.lostColor;
@@ -996,7 +1180,7 @@ public class GameManager : MonoBehaviour
 
             AnnouncerHeader.GetComponent<TextFadeInEffect>().ShowEffect(AnnouncerHeader.color);
         }
-        else if(PhotonNetwork.LocalPlayer.ActorNumber == 2) // not writing else just to make sure.....
+        else if(PhotonNetwork.LocalPlayer.ActorNumber%2 == 0) // not writing else just to make sure.....
         {
             AnnouncerHeader.text = isDraw ? "ITS A TIE" : !PlayerAWon ? "YOU WON" : "YOU LOSE";
             AnnouncerHeader.color = isDraw ? Color.white : !PlayerAWon ? gameConfig.winColor : gameConfig.lostColor;

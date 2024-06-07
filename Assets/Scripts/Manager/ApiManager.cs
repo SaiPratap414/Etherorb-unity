@@ -35,9 +35,11 @@ public class ApiManager
         userWalletAdress = address;
         HttpClient client = new HttpClient();
         string url = baseURL + $"user/{address}";
+        Debug.Log("GetUserNFTs--->" + url);
         client.Get(new Uri(url), HttpCompletionOption.AllResponseContent, (r) =>
         {
             userModel = JsonUtility.FromJson<UserModel>(r.ReadAsString());
+            Debug.Log("userModel.success  --->" + userModel.success);
             if (userModel.success)
             {
                 if (userModel.data.nfts ==null || userModel.data.nfts.Count==0)

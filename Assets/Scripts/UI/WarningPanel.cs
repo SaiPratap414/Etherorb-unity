@@ -16,7 +16,9 @@ public class WarningPanel : MonoBehaviour
     [SerializeField] private Button yesButton;
     [SerializeField] private Button noButton;
 
-    [SerializeField] private RoundTimer timer;
+    //[SerializeField] private RoundTimer timer;
+
+    [SerializeField] private ReMatchTimer timer;
 
     [SerializeField] private Sprite soundOn;
     [SerializeField] private Sprite soundOff;
@@ -45,6 +47,8 @@ public class WarningPanel : MonoBehaviour
 
     private Color finalColor;
 
+    private static WarningPanel instance;
+
     private EventManager eventManager;
 
     private void Awake()
@@ -59,9 +63,19 @@ public class WarningPanel : MonoBehaviour
         eventManager = EventManager.Instance;
         eventManager.OnRematchTimerCompleted += RematchCancled;
 
-        userAddressButton = userWalletAddressText.GetComponent<Button>();
-
+        userAddressButton = userWalletAddressText.GetComponent<Button>(); 
         userAddressButton.onClick.AddListener(CopyUserAddress);
+
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        DontDestroyOnLoad(gameObject);
     }
     private void OnDestroy()
     {
@@ -100,19 +114,22 @@ public class WarningPanel : MonoBehaviour
     public void ShowPopup()
     {
         blocker.SetActive(true);
-        timer.setRoundBool(true);
+        //timer.setRoundBool(true);
+        timer.StartTimer();
         popupRectTransform.DOMoveY((initialPosition.y + popUPShowFactor), 0.7f).SetEase(Ease.InOutElastic);        
     }
     public void HidePopUp()
     {
         blocker.SetActive(false);
-        timer.setRoundBool(false);
+        //timer.setRoundBool(false);
+        //timer.StopTimer();
         popupRectTransform.DOMoveY((initialPosition.y - popUPShowFactor), 0f).SetEase(Ease.InOutElastic);
     }
 
     private void OnButtonAction(bool show)
     {
         HidePopUp();
+        timer.StopTimer();
         if (show)
         {
             GameManager.instance.ReMatchAcceptance();

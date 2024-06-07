@@ -32,7 +32,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
         Debug.Log("OnEnable CountdownTimer");
         base.OnEnable();
         // the starttime may already be in the props. look it up.
-        Initialize();
+        //Initialize();
     }
 
     public override void OnDisable()
@@ -72,15 +72,14 @@ public class TimerScript : MonoBehaviourPunCallbacks
         this.isTimerRunning = false;
         this.Text.text = string.Empty;
         cachedTimeRemaining = 0;
-
-        Debug.Log("OntimerEnd--->");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
             PhotonConnector.instance.MatchMakingTimerCompleted();
             return;
         }
-        PhotonNetwork.LeaveRoom();
-        MenuManager.instance.OpenMenuId(2);
+        if (PhotonNetwork.InRoom)
+            PhotonNetwork.LeaveRoom();
+        //MenuManager.instance.OpenMenuId(2);
     }
 
 
@@ -108,6 +107,7 @@ public class TimerScript : MonoBehaviourPunCallbacks
                 OnTimerRuns();
             else
                 OnTimerEnds();
+           
         }
     }
 

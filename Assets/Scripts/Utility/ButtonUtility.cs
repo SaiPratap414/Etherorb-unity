@@ -64,11 +64,13 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
         EtherOrbManager.Instance.AudioManager.PlayAudio(AudioTag.Hover);
         if (changeSprite)
         {
-            image.sprite = hoverSprite;
+            if (image != null)
+                image.sprite = hoverSprite;
         }
         else
         {
-            image.color = hoverImageColor;
+            if(image!=null)
+                image.color = hoverImageColor;
             text.color = hoverTextColor;
         }
     }
@@ -85,11 +87,13 @@ public class ButtonUtility : MonoBehaviour , IPointerEnterHandler,IPointerExitHa
     {
         if (changeSprite)
         {
-            image.sprite = normalSprite;
+            if (image != null)
+                image.sprite = normalSprite;
         }
         else
         {
-            image.color = normalImageColor;
+            if (image != null)
+                image.color = normalImageColor;
             if(text !=null)
             text.color = normalTextColor;
         }
