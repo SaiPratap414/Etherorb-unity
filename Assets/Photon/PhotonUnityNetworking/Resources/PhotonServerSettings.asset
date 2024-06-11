@@ -54,6 +54,7 @@ MonoBehaviour:
   - RPC_SaveChoices
   - RPC_PlayerExit
   - RPC_StartGame
+  - RPC_LeaveRoom
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
