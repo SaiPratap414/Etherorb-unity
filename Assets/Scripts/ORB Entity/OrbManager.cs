@@ -60,7 +60,7 @@ public class OrbManager : MonoBehaviour
         }
         UiObjects.Clear();
         sprites.Clear();
-        OrbOwned = !string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()) ? ApiManager.Instance.nftMetaData : JsonUtility.FromJson<NFTMeta>(temp.text);
+        OrbOwned = !string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()) ? EtherOrbManager.Instance.nftMetaData : JsonUtility.FromJson<NFTMeta>(temp.text);
         Debug.Log("OrbOwned---->" + OrbOwned.OrbDetails.Count);
         selectedOrb = OrbOwned.OrbDetails[0];
         selectedIndex = 0;

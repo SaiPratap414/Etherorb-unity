@@ -1,7 +1,10 @@
+using CI.HttpClient;
 using Photon.Pun;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -27,11 +30,11 @@ public class MenuManager : MonoBehaviour
     [Header("LoginPanel")]
     [SerializeField] GameObject menuPanel;
     [SerializeField] GameObject loginPanel;
-    [SerializeField] TMP_InputField Email_IF;
+    [SerializeField] InputField Email_IF;
 
     [Header("PlayFab Username First Time..")]
     [SerializeField] GameObject newuserNamePanel;
-    [SerializeField] TMP_InputField name_IF;
+    [SerializeField] InputField name_IF;
 
     [Header("Orb UI ")]
     [SerializeField] GameObject orbPrefab;
@@ -311,10 +314,9 @@ public class MenuManager : MonoBehaviour
         addNFTButton.gameObject.SetActive(false);
     }
     public void GetUserNFTs()
-    {
-        if(!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
-            ApiManager.Instance.GetUserNFTs(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress());
-    }
+    { 
+        EtherOrbManager.Instance.GetUserNFTs();
+    } 
     private void ShowMyOrbScreen()
     {
         myStats.gameObject.SetActive(false);
@@ -357,7 +359,15 @@ public class MenuManager : MonoBehaviour
         {
             PlayfabConnet.instance.SetPlayerName(name_IF.text);
             nameText.text = name_IF.text;
+            OpenMenuId(4);
+            StartCoroutine(WaitForPlayerNameUpadate());
         }
+    }
+
+    private IEnumerator WaitForPlayerNameUpadate()
+    {
+        yield return new WaitUntil(() => PlayfabConnet.instance.GetHasLogedIn);
+        LoginWithEmail();
     }
 
     public void ShowRetryPanel()
@@ -377,11 +387,12 @@ public class MenuManager : MonoBehaviour
     public void OnMatchFound()
     {
         SetMatchFoundProperties("MATCH FOUND", Color.white, false);
-        if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
-        {
-            string roomId = PhotonNetwork.CurrentRoom.Name;
-            ApiManager.Instance.StartMatchWithNFT(roomId);
-        }
+        //if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+        //{
+        //    string roomId = PhotonNetwork.CurrentRoom.Name;
+        //    ApiManager.Instance.StartMatchWithNFT(roomId);
+        //}
+        EtherOrbManager.Instance.StartMatchWithNFT(PhotonNetwork.CurrentRoom.Name);
         StopMatchMakingTimer();
         PhotonConnector.instance.isRetryingMatch = false;
     }

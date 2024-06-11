@@ -26,6 +26,8 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
 
     private ApiManager apiManager;
 
+    private EtherOrbManager etherOrbManager;
+
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -44,6 +46,8 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(this.gameObject);
 
         apiManager = ApiManager.Instance;
+
+        etherOrbManager = EtherOrbManager.Instance;
     }
 
 
@@ -171,13 +175,17 @@ public class PhotonConnector : MonoBehaviourPunCallbacks
     {
         if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
         {
-            while (apiManager.userModel !=null && apiManager.userModel.success && apiManager.userModel.data != null
-                && apiManager.userModel.data.nfts.Count != apiManager.nftMetaData.OrbDetails.Count)
+            yield return new WaitUntil(() => EtherOrbManager.Instance.isUserDataReady);
+
+            Debug.Log("LoadMenu NFTs cound--->" + EtherOrbManager.Instance.userModel.data.nfts.Count);
+
+            while (EtherOrbManager.Instance.userModel.data.nfts.Count != EtherOrbManager.Instance.nftMetaData.OrbDetails.Count)
             {
+                Debug.Log("LoadMenu.userModel---> " + EtherOrbManager.Instance.userModel.success);
                 yield return new WaitForSeconds(1f);
             }
         }
-        Debug.Log("nftMetaDatas---->" + ApiManager.Instance.nftMetaData.OrbDetails.Count);
+        Debug.Log("nftMetaDatas---->" + EtherOrbManager.Instance.nftMetaData.OrbDetails.Count);
         OrbManager.instance.GetAllOrbDetails();
         MenuManager.instance.OpenMenuId(2);
         MenuManager.instance.screenSwipe.RefreshContents();

@@ -741,11 +741,12 @@ public class GameManager : MonoBehaviour
 
     private void ExecuteMatchComplete(string winningAddress)
     {
-        if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
-        {
-            Debug.Log("winnerAddress----> " + winningAddress);
-            ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winningAddress);
-        }
+        //if (!string.IsNullOrEmpty(EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress()))
+        //{
+        //    Debug.Log("winnerAddress----> " + winningAddress);
+        //    ApiManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winningAddress);
+        //}
+        EtherOrbManager.Instance.CompleteMatchWithNFT(PhotonNetwork.CurrentRoom.Name, winningAddress);
     }
 
     void ButtonsEnable(bool isVisibl)
