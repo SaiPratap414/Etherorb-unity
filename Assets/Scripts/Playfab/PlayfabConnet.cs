@@ -16,15 +16,22 @@ public class PlayfabConnet : MonoBehaviour
     public bool GetHasLogedIn { get { return hasLogedIn; } }
 
     private string playerName;
+    private string playFabId;
     public string PlayerName { get { return playerName; } }
 
     private string matchHistoriesData;
     public MatchHistory matchHistories = new MatchHistory();
 
+    private Dictionary<string, List<Leaderboard>> playFabLeaderboardDictionary = new Dictionary<string, List<Leaderboard>>();
+
+    public GameLeaderboardData gameLeaderboardData = new GameLeaderboardData();
+
     private string walletAdd;
     public int totalScore;
 
     [SerializeField] int numOfGamesPlayed = 0;
+
+    [SerializeField] private GameConfig gameConfig;
 
     private EtherOrbManager etherOrbManager;
 
@@ -74,10 +81,14 @@ public class PlayfabConnet : MonoBehaviour
 
     private void OnLoginSuccess(LoginResult result)
     {
-        Debug.Log("Login Success");
+        Debug.Log("Login Success" + result.ToJson());
 
         // Save Login Id
         PlayerPrefs.SetString("LoginId", walletAdd);
+
+        playFabId = result.PlayFabId;
+
+        Debug.Log("playFabId--->" + playFabId);
 
         //UserPrefsManager.GetHasLogedIn = 1;
 
@@ -128,7 +139,7 @@ public class PlayfabConnet : MonoBehaviour
             DisplayName = playerName
         };
 
-        PlayFabClientAPI.UpdateUserTitleDisplayName(nameRequest, OnDisplayNameUpdate, OnDataError);
+        PlayFabClientAPI.UpdateUserTitleDisplayName(nameRequest, OnDisplayNameUpdate, OnInvalidNameEnter);
     }
 
 
@@ -163,13 +174,16 @@ public class PlayfabConnet : MonoBehaviour
 
     private void OnDataError(PlayFabError error)
     {
-
         Debug.LogError("Player Data Error: " + error.ErrorMessage);
-        //MenuManager.instance.OpenMenuId(0);
+        etherOrbManager.WarningPanel.ShowWarning(error.ErrorMessage);
+    }
+    private void OnInvalidNameEnter(PlayFabError error)
+    {
+        MenuManager.instance.OpenMenuId(1);
         etherOrbManager.WarningPanel.ShowWarning(error.ErrorMessage);
     }
 
-    private void GetPlayerData()
+    public void GetPlayerData()
     {
         Debug.Log("Trying to fetch player data");
         PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnDataRecieved, OnDataError);
@@ -187,9 +201,10 @@ public class PlayfabConnet : MonoBehaviour
 
         playerName = result.Data["PlayerName"].Value;
         walletAdd = result.Data["ADAWalletAddress"].Value;
-
+        
         if (result.Data.ContainsKey(matchHistoryKey))
         {
+            matchHistories = null;
             matchHistoriesData = result.Data[matchHistoryKey].Value;
             matchHistories = JsonUtility.FromJson<MatchHistory>(matchHistoriesData);
             Debug.Log("User Match History Count ---> " +matchHistories.userMatchHistories.Count);
@@ -232,7 +247,6 @@ public class PlayfabConnet : MonoBehaviour
             }
         };
         PlayFabClientAPI.UpdateUserData(request, OnScoreChanged, OnDataError);
-        SendLeaderboard(totalScore);
     }
     void OnScoreChanged(UpdateUserDataResult result)
     {
@@ -290,9 +304,11 @@ public class PlayfabConnet : MonoBehaviour
 
     public void GetStartingData()
     {
+        playFabLeaderboardDictionary.Clear();
+        gameLeaderboardData.rankLeaderBoards.Clear();
         PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnGetStartingData, OnDataError);
+        SendLeaderboard();
     }
-
     private void OnGetStartingData(GetUserDataResult result)
     {
         if (result != null)
@@ -312,16 +328,37 @@ public class PlayfabConnet : MonoBehaviour
     // Not in Use.....
     #region Leaderboard
 
-    public void SendLeaderboard(int _score)
+    public void SendLeaderboard()
     {
         var request = new UpdatePlayerStatisticsRequest
         {
-            Statistics = new List<StatisticUpdate>
+            CustomTags = new Dictionary<string, string>()
+            {
+                { "UserName", playerName },
+                { "WalletID", string.Empty },
+            },
+
+        Statistics = new List<StatisticUpdate>
             {
                 new StatisticUpdate
                 {
-                    StatisticName = "HighScore",
-                    Value = _score
+                    StatisticName = gameConfig.statisticName[0],
+                    Value = matchHistories.XP,
+                },
+                new StatisticUpdate
+                {
+                    StatisticName = gameConfig.statisticName[1],
+                    Value = matchHistories.totalGamesPlayed,
+                },
+                new StatisticUpdate
+                {
+                    StatisticName = gameConfig.statisticName[2],
+                    Value = (int)matchHistories.winRate,
+                },
+                 new StatisticUpdate
+                {
+                    StatisticName = gameConfig.statisticName[3],
+                    Value = matchHistories.totalWinMatches,
                 }
             }
         };
@@ -329,50 +366,81 @@ public class PlayfabConnet : MonoBehaviour
         PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnLeaderboardError);
     }
 
-
     private void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
     {
-        Debug.Log("Leaderboard Updated Successfully");
+        Debug.Log("Leaderboard Updated Successfully---->" + result.ToJson());
+        GetLeaderboard();
     }
-
     private void OnLeaderboardError(PlayFabError error)
     {
         Debug.LogError("Leaderboard Error: " + error.ErrorMessage);
     }
-
     public void GetLeaderboard()
     {
-        var request = new GetLeaderboardRequest
+        foreach (var item in gameConfig.statisticName)
         {
-            StatisticName = "HighScore",
-            StartPosition = 0,
-            MaxResultsCount = 100
-        };
+            var request = new GetLeaderboardRequest
+            {
+                StatisticName = item,
+                StartPosition = 0,
+                MaxResultsCount = 100
+            };
 
-        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnLeaderboardError);
-
+            PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnLeaderboardError);
+        }
     }
-
-    public void GetLeaderboardAroundPlayer()
-    {
-        var request = new GetLeaderboardAroundPlayerRequest
-        {
-            StatisticName = "HighScore",
-            MaxResultsCount = 100,
-        };
-
-
-        PlayFabClientAPI.GetLeaderboardAroundPlayer(request, OnLeaderboardGetPlayer, OnLeaderboardError);
-    }
-
     private void OnLeaderboardGet(GetLeaderboardResult result)
     {
-        
+        Debug.LogError("GetLeaderboardResult : " + result.ToJson());
+        LeaderboardModel leaderboardModel = new LeaderboardModel();
+        leaderboardModel = JsonUtility.FromJson<LeaderboardModel>(result.ToJson());
+
+        playFabLeaderboardDictionary.Add(leaderboardModel.Request.StatisticName, leaderboardModel.Leaderboard);
+
+        if(playFabLeaderboardDictionary.Count == gameConfig.statisticName.Count)
+        {
+            SetRankDataForLeaderboard();
+        }
     }
 
-    private void OnLeaderboardGetPlayer(GetLeaderboardAroundPlayerResult result)
+    private void SetRankDataForLeaderboard()
     {
+        foreach (var item in playFabLeaderboardDictionary[gameConfig.statisticName[0]])
+        {
+            RankLeaderBoard rankLeaderBoard = new RankLeaderBoard();
+            rankLeaderBoard.rank = item.Position+1;
+            rankLeaderBoard.name = item.DisplayName;
+            rankLeaderBoard.XP = item.StatValue;
 
+            //Need to add winrate, gameplayed and vol...
+            gameLeaderboardData.rankLeaderBoards.Add(rankLeaderBoard);
+        }
+
+        foreach (var item in playFabLeaderboardDictionary[gameConfig.statisticName[1]])
+        {
+            int index = gameLeaderboardData.rankLeaderBoards.FindIndex(x => x.name.Equals(item.DisplayName));
+            if (index != -1)
+            {
+                gameLeaderboardData.rankLeaderBoards[index].gamePlayed = item.StatValue;
+            }
+        }
+
+        foreach (var item in playFabLeaderboardDictionary[gameConfig.statisticName[2]])
+        {
+            int index = gameLeaderboardData.rankLeaderBoards.FindIndex(x => x.name.Equals(item.DisplayName));
+            if (index != -1)
+            {
+                gameLeaderboardData.rankLeaderBoards[index].winRate = item.StatValue;
+            }
+        }
+        foreach (var item in playFabLeaderboardDictionary[gameConfig.statisticName[3]])
+        {
+            int index = gameLeaderboardData.rankLeaderBoards.FindIndex(x => x.name.Equals(item.DisplayName));
+            if (index != -1)
+            {
+                gameLeaderboardData.rankLeaderBoards[index].gameVol = item.StatValue;
+            }
+        }
     }
 
     public void FetchServerTime(Action<GetTimeResult> onSuccess,Action<PlayFabError> onError)
@@ -385,7 +453,6 @@ public class PlayfabConnet : MonoBehaviour
     }
     #endregion
 
-
     #region UI
 
     public void PlayFabLoginWithWalletId(string _walletAdd)
@@ -394,7 +461,6 @@ public class PlayfabConnet : MonoBehaviour
         MenuManager.instance.OpenMenuId(4);
         Login();
     }
-
 
     #endregion
 }

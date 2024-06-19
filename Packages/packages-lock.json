@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.gilzoide.gradient-rect": {
+      "version": "https://github.com/gilzoide/unity-gradient-rect.git#1.1.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e6be9f138022c93b16b68218bc6b762d4cef9002"
+    },
     "com.heurekagames.assethunterpro": {
       "version": "file:com.heurekagames.assethunterpro",
       "depth": 0,

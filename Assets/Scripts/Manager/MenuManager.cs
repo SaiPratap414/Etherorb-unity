@@ -54,19 +54,6 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject retryPanel;
     [SerializeField] private FindMatchMidPanel findMatchMidPanel;
 
-    [SerializeField] private VideoPlayer introVideo;
-
-    [SerializeField] private Button myOrbButton;
-    [SerializeField] private Button myStatsButton;
-
-    private TextMeshProUGUI myStatText;
-    private TextMeshProUGUI myOrbText;
-
-    [SerializeField] private MyStats myStats;
-    [SerializeField] private GameObject myPanel;
-
-    [SerializeField] private Color deSelectedColor;
-
     public ScreenSwipe screenSwipe;
 
     private void OnEnable()
@@ -81,15 +68,7 @@ public class MenuManager : MonoBehaviour
         {
             Debug.Log("PhotonNetwork name -- " + PhotonNetwork.LocalPlayer.NickName);
         }
-
-        myStatText = myStatsButton.GetComponent<TextMeshProUGUI>();
-        myOrbText = myOrbButton.GetComponent<TextMeshProUGUI>();
-        myStatText.fontStyle = FontStyles.Underline;
         addNFTButton.onClick.AddListener(AddNFT);
-        myOrbButton.onClick.AddListener(ShowMyOrbScreen);
-        myStatsButton.onClick.AddListener(ShowMyStatsScreen);
-
-        ShowMyOrbScreen();
     }
 
     private void Start()
@@ -100,7 +79,9 @@ public class MenuManager : MonoBehaviour
         {
             nameText.text = PlayfabConnet.instance.PlayerName;
             OrbManager.instance.GetAllOrbDetails();
-            OpenMenuId(2);
+            //TODO --Fetching the latest data once user completes the game and then loading the orb screen when leaderboard API success.
+            PlayfabConnet.instance.GetPlayerData();
+            //OpenMenuId(2);
             StartCoroutine(LoadSelectedItem());
         }
         else if (UserPrefsManager.UserName !=string.Empty)
@@ -122,26 +103,12 @@ public class MenuManager : MonoBehaviour
 
     private void Update()
     {
-        //if (PlayfabConnet.instance.GetHasLogedIn)
-        //{
-        //    ConnectButton.SetActive(false);
-        //    ConnectedButton.SetActive(true);
-        //}
-
         if (!PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.IsConnected) return;
 
         if (PhotonNetwork.InRoom)
         {
-            //timerCounter.text = TimerScript.instance.timerToStart.ToString("0");
+
         }
-
-    }
-
-    IEnumerator showLoadingScreenAndOpen(float sec, int menuId)
-    {
-        OpenMenuId(2);
-        yield return new WaitForSeconds(sec);
-        OpenMenuId(menuId);
     }
 
     public void OpenMenuId(int id)
@@ -211,13 +178,6 @@ public class MenuManager : MonoBehaviour
         stopMatch.SetActive(true);
 
     }
-    private IEnumerator WaitForPhotonConnection()
-    {
-        yield return new WaitForSeconds(3);
-        PhotonConnector.instance.FindMatch();
-        Debug.Log("Start fininding match--->");
-    }
-
     public void BackToHome()
     {
         SetMatchFoundProperties("FINDING MATCH", Color.black, true);
@@ -247,7 +207,6 @@ public class MenuManager : MonoBehaviour
         }
         if (scene.buildIndex == 1)
         {
-            Debug.Log("Creating PlayerManager----->");
             PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity);
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
@@ -317,29 +276,6 @@ public class MenuManager : MonoBehaviour
     { 
         EtherOrbManager.Instance.GetUserNFTs();
     } 
-    private void ShowMyOrbScreen()
-    {
-        myStats.gameObject.SetActive(false);
-        myStatText.fontStyle = FontStyles.Underline;
-        myOrbText.fontStyle = FontStyles.Normal;
-        myOrbText.color = Color.white;
-        myStatText.color = deSelectedColor;
-        myPanel.SetActive(true);
-        myOrbButton.enabled = false;
-        myStatsButton.enabled = true;
-    }
-    private void ShowMyStatsScreen()
-    {
-        myStats.Init();
-        myPanel.SetActive(false);
-        myStatText.fontStyle = FontStyles.Normal;
-        myOrbText.fontStyle = FontStyles.Underline;
-        myStatText.color = Color.white;
-        myOrbText.color = deSelectedColor;
-        myStats.gameObject.SetActive(true);
-        myOrbButton.enabled = true;
-        myStatsButton.enabled = false;
-    }
     #region OrbSpawning Ui
 
     public GameObject SpawnOrbUI()

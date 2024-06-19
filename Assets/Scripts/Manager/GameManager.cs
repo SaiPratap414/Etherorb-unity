@@ -161,6 +161,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Animator impactAnimatorA;
     [SerializeField] private Animator impactAnimatorB;
 
+    [SerializeField] private Chibby chibby;
+
     public PhotonView pv;
 
     private CardType cardWon;
@@ -722,7 +724,8 @@ public class GameManager : MonoBehaviour
 
             AudioTag tag = playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
-
+            string anim = playerAWon ? "win" : "loss";
+            chibby.PlayAnimation(anim);
             DefeatPanel.SetActive(!playerAWon);
             ExecuteMatchComplete(playerAWon ? userWallets[0] : userWallets[1]);
         }
@@ -733,6 +736,9 @@ public class GameManager : MonoBehaviour
 
             AudioTag tag = !playerAWon ? AudioTag.WinScreen : AudioTag.LoseScreen;
             audioManager.PlayAudio(tag);
+
+            string anim = !playerAWon ? "win" : "loss";
+            chibby.PlayAnimation(anim);
 
             DefeatPanel.SetActive(playerAWon);
             ExecuteMatchComplete(playerAWon ? userWallets[0] : userWallets[1]);
@@ -948,8 +954,11 @@ public class GameManager : MonoBehaviour
         userMatchHistory.matchScore = matchScore;
         userMatchHistory.wageredAmount = 1;
         userMatchHistory.reward = reward;
-        userMatchHistory.orbId = string.Empty; 
+        userMatchHistory.orbId = string.Empty; // TODO : Get this when APIs fully working...
         userMatchHistory.orbImageUrl = string.Empty;
+        userMatchHistory.XP = PlayfabConnet.instance.matchHistories.XP;
+        userMatchHistory.username = PlayfabConnet.instance.PlayerName;
+        userMatchHistory.walletID = EtherOrbManager.Instance.WarningPanel.GetUserWalletAddress();
         PlayfabConnet.instance.FetchServerTime(OnServerTimeSuccess, OnServerTimeFailure);
     }
 
@@ -960,7 +969,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Unix timestamp: " + unixTimestamp);
         userMatchHistory.timestamp = unixTimestamp;
 
-        //PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
+        PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
     }
 
     private void OnServerTimeFailure(PlayFabError error)
@@ -972,7 +981,7 @@ public class GameManager : MonoBehaviour
         long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
         userMatchHistory.timestamp = unixTime;
 
-        //PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
+        PlayfabConnet.instance.UpdatePlayerHistory(userMatchHistory);
     }
 
     void GenerateRandomOption()

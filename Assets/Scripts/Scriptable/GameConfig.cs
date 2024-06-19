@@ -17,6 +17,9 @@ public class GameConfig : ScriptableObject
     public Color winColor;
     public List<LostAnimationName> lostAnimationNames;
     public List<WinVFXNames> winVFXNames;
+
+    public List<string> statisticName = new List<string>();
+    public List<Gradient> gradients = new List<Gradient>();
 }
 
 [Serializable]

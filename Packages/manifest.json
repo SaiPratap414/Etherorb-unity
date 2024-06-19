@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.gilzoide.gradient-rect": "https://github.com/gilzoide/unity-gradient-rect.git#1.1.0",
     "com.matthewminer.consolation": "https://github.com/mminer/consolation.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.3.1",

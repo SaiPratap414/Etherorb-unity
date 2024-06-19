@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using PooledScrollList.Data;
 
 [Serializable]
 public class UserModel : UserBase
@@ -78,6 +79,9 @@ public class UserMatchHistory
     public string orbImageUrl;
     public string orbId;
     public string aerValue;
+    public int XP;
+    public string walletID;
+    public string username;
 
     public string GetMatchStatus()
     {
@@ -119,7 +123,6 @@ public class UserMatchHistory
     public string GetTime()
     {
         DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(timestamp).ToLocalTime();
-        Debug.Log(dt.ToString("HH:mm"));
         return dt.ToString("HH:mm");
     }
 }
@@ -145,6 +148,8 @@ public class MatchHistory
     public int totatDrawMatches { get { return userMatchHistories.FindAll(x => x.matchWon.Equals((int)MatchStatus.draw)).Count; } }
 
     public float winRate { get { return (float)totalWinMatches *100 / (float)totalGamesPlayed; } }
+
+    public int XP { get { return ((int)winRate * 1000) + ((int)totalGamesPlayed * 10); } }
 }
 
 [Serializable]
@@ -188,6 +193,81 @@ public class NFTMeta
 {
     public List<NFTMetaData> OrbDetails = new List<NFTMetaData>();
 }
+
+[Serializable]
+public class Leaderboard
+{
+    public string DisplayName;
+    public string PlayFabId;
+    public int Position;
+    public Profile Profile;
+    public int StatValue;
+}
+[Serializable]
+public class Profile
+{
+    public object AdCampaignAttributions;
+    public object AvatarUrl;
+    public object BannedUntil;
+    public object ContactEmailAddresses;
+    public object Created;
+    public string DisplayName;
+    public object ExperimentVariants;
+    public object LastLogin;
+    public object LinkedAccounts;
+    public object Locations;
+    public object Memberships;
+    public object Origination;
+    public string PlayerId;
+    public string PublisherId;
+    public object PushNotificationRegistrations;
+    public object Statistics;
+    public object Tags;
+    public string TitleId;
+    public object TotalValueToDateInUSD;
+    public object ValuesToDate;
+}
+
+[Serializable]
+public class StatisticModel
+{
+    public object CustomTags;
+    public int MaxResultsCount;
+    public object ProfileConstraints;
+    public int StartPosition;
+    public string StatisticName;
+    public object Version;
+    public object AuthenticationContext;
+}
+[Serializable]
+public class LeaderboardModel
+{
+    public List<Leaderboard> Leaderboard;
+    public object NextReset;
+    public int Version;
+    public StatisticModel Request;
+    public object CustomData;
+}
+
+[Serializable]
+public class GameLeaderboardData
+{
+    public List<RankLeaderBoard> rankLeaderBoards = new List<RankLeaderBoard>();
+}
+[Serializable]
+public class RankLeaderBoard: PooledData
+{
+    public int rank;
+    public string name;
+    public string walletAddress;
+    public string profilePic;
+    public int XP;
+    public int gamePlayed;
+    public int winRate;
+    public int gameVol;
+}
+
+
 
 
 

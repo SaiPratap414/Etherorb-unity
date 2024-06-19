@@ -16,8 +16,6 @@ public class WarningPanel : MonoBehaviour
     [SerializeField] private Button yesButton;
     [SerializeField] private Button noButton;
 
-    //[SerializeField] private RoundTimer timer;
-
     [SerializeField] private ReMatchTimer timer;
 
     [SerializeField] private Sprite soundOn;
@@ -114,15 +112,12 @@ public class WarningPanel : MonoBehaviour
     public void ShowPopup()
     {
         blocker.SetActive(true);
-        //timer.setRoundBool(true);
         timer.StartTimer();
         popupRectTransform.DOMoveY((initialPosition.y + popUPShowFactor), 0.7f).SetEase(Ease.InOutElastic);        
     }
     public void HidePopUp()
     {
         blocker.SetActive(false);
-        //timer.setRoundBool(false);
-        //timer.StopTimer();
         popupRectTransform.DOMoveY((initialPosition.y - popUPShowFactor), 0f).SetEase(Ease.InOutElastic);
     }
 
@@ -151,7 +146,7 @@ public class WarningPanel : MonoBehaviour
         musicImage.sprite = music.isOn ? musicOn : musicOff;
         if(music.isOn)
             EtherOrbManager.Instance.AudioManager.PlayMusic();
-        else
+        else    
             EtherOrbManager.Instance.AudioManager.StopMusic();
     }
     public void OnSoundToggleValueChange()
@@ -170,7 +165,7 @@ public class WarningPanel : MonoBehaviour
     }
     public string GetUserWalletAddress()
     {
-        return userWalletAddress;
+        return string.IsNullOrEmpty(userWalletAddress) ? string.Empty : userWalletAddress;
     }
     private void CopyUserAddress()
     {
