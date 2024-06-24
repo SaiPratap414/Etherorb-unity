@@ -39,7 +39,7 @@ public class UIScreenManager : MonoBehaviour
     {
         myStats.gameObject.SetActive(false);
         DeSelectButtonAndText();
-        myOrbText.fontStyle = FontStyles.Normal;
+        myOrbText.fontStyle = FontStyles.UpperCase;
 
         myOrbText.color = Color.white;
         myPanel.SetActive(true);
@@ -53,7 +53,7 @@ public class UIScreenManager : MonoBehaviour
         myPanel.SetActive(false);
         DeSelectButtonAndText();
 
-        myStatText.fontStyle = FontStyles.Normal;
+        myStatText.fontStyle = FontStyles.UpperCase;
         myStatText.color = Color.white;
         myStats.gameObject.SetActive(true);
 
@@ -66,7 +66,7 @@ public class UIScreenManager : MonoBehaviour
         myPanel.SetActive(false);
         DeSelectButtonAndText();
 
-        leaderboardText.fontStyle = FontStyles.Normal;
+        leaderboardText.fontStyle = FontStyles.UpperCase;
         leaderboardText.color = Color.white;
         leaderBoard.gameObject.SetActive(true);
 

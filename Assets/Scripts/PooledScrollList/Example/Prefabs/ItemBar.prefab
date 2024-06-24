@@ -165,7 +165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.06666667, g: 0.06666667, b: 0.06666667, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -193,7 +193,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b23d1591aa774c4ab076467fcf821c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Image: {fileID: 114623387501877384}
   gameConfig: {fileID: 11400000, guid: cb36bc1e274cd44de88690b7aa3a0f9b, type: 2}
   rank: {fileID: 8400811495014158489}
   playerName: {fileID: 5484214867571081262}

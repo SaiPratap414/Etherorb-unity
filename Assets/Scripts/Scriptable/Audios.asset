@@ -18,7 +18,7 @@ MonoBehaviour:
     audioTag: 0
     loop: 1
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: 6fd6256a765484a408a83a630a2a20c6, type: 3}
+  - audioClip: {fileID: 8300000, guid: 008e5e985eea4497da54c1532b4f5d61, type: 3}
     volume: 1
     audioTag: 4
     loop: 1
@@ -38,12 +38,12 @@ MonoBehaviour:
     audioTag: 9
     loop: 0
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: 9c5150fabe2514a3baf7b6430d57f367, type: 3}
+  - audioClip: {fileID: 8300000, guid: 663de042f1bd6411282a55a8b0fa856d, type: 3}
     volume: 1
     audioTag: 8
     loop: 0
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: e3bb127ff3f0449c88174d5b647d441b, type: 3}
+  - audioClip: {fileID: 8300000, guid: 24864827b7f9c4124bc322ec014869c6, type: 3}
     volume: 1
     audioTag: 5
     loop: 0
@@ -53,17 +53,17 @@ MonoBehaviour:
     audioTag: 6
     loop: 0
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: 3fa0a67061f4b437d937bd30a131498a, type: 3}
+  - audioClip: {fileID: 8300000, guid: 707832ac25efb4d629cdcabc76ce94b0, type: 3}
     volume: 1
     audioTag: 3
     loop: 0
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: 5b9a9e969dfd341a595cc784881d0122, type: 3}
+  - audioClip: {fileID: 8300000, guid: 28f3cb1eb8db04bb0ae7e3e580b907ba, type: 3}
     volume: 1
     audioTag: 7
     loop: 0
     isMusic: 0
-  - audioClip: {fileID: 8300000, guid: cd05ef5d402694b4f8efce4b18bc9c09, type: 3}
+  - audioClip: {fileID: 8300000, guid: abfb0d507d2b84b279147e3c4260292a, type: 3}
     volume: 1
     audioTag: 13
     loop: 0

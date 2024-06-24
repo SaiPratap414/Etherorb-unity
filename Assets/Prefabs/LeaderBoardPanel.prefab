@@ -57,6 +57,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 887887619584553666}
     m_Modifications:
+    - target: {fileID: 2337412952783318649, guid: 1c54d55816faa4369a19869ea303438e,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -150
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337412952783318649, guid: 1c54d55816faa4369a19869ea303438e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 75
+      objectReference: {fileID: 0}
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
       propertyPath: m_Pivot.x
@@ -95,7 +105,7 @@ PrefabInstance:
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: -2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
@@ -140,7 +150,7 @@ PrefabInstance:
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
@@ -155,6 +165,16 @@ PrefabInstance:
     - target: {fileID: 3459732327813967657, guid: 1c54d55816faa4369a19869ea303438e,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492469716864915151, guid: 1c54d55816faa4369a19869ea303438e,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: -200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492469716864915151, guid: 1c54d55816faa4369a19869ea303438e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7917326029817041611, guid: 1c54d55816faa4369a19869ea303438e,

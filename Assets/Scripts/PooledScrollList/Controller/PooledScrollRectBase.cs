@@ -15,6 +15,7 @@ namespace PooledScrollList.Controller
             BottomToTop
         }
 
+        [SerializeField] private PooledElement userElement;
         private Pool<PooledElement> _elementsPool;
 
         protected readonly List<PooledElement> ActiveElements = new List<PooledElement>();
@@ -101,6 +102,13 @@ namespace PooledScrollList.Controller
             if (DataProvider != null)
             {
                 Initialize(DataProvider.GetData());
+                //Set users item in the bottom...
+                RankLeaderBoard leaderBoard = PlayfabConnet.instance.gameLeaderboardData.rankLeaderBoards.Find(x => x.name.Equals(PlayfabConnet.instance.PlayerName));
+                if (leaderBoard != null)
+                {
+                    userElement.PooledView.SetData(leaderBoard);
+                    userElement.gameObject.SetActive(true);
+                }
             }
             else
             {

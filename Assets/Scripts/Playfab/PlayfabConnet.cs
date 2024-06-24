@@ -281,7 +281,12 @@ public class PlayfabConnet : MonoBehaviour
                 {matchHistoryKey,  userMatchHistoryJson}
             }
         };
-        PlayFabClientAPI.UpdateUserData(request, OnUpdateGamesPlayed, OnDataError);
+        PlayFabClientAPI.UpdateUserData(request, OnSuccessMatchHistorySend, OnDataError);
+    }
+
+    private void OnSuccessMatchHistorySend(UpdateUserDataResult result)
+    {
+        SendLeaderboard();
     }
 
     public void UpdateLastMatchId(string lastMatchIdValue)
@@ -307,7 +312,7 @@ public class PlayfabConnet : MonoBehaviour
         playFabLeaderboardDictionary.Clear();
         gameLeaderboardData.rankLeaderBoards.Clear();
         PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnGetStartingData, OnDataError);
-        SendLeaderboard();
+        GetLeaderboard();
     }
     private void OnGetStartingData(GetUserDataResult result)
     {
@@ -369,11 +374,12 @@ public class PlayfabConnet : MonoBehaviour
     private void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
     {
         Debug.Log("Leaderboard Updated Successfully---->" + result.ToJson());
-        GetLeaderboard();
     }
     private void OnLeaderboardError(PlayFabError error)
     {
         Debug.LogError("Leaderboard Error: " + error.ErrorMessage);
+        etherOrbManager.WarningPanel.ShowWarning(error.ErrorMessage);
+
     }
     public void GetLeaderboard()
     {
@@ -441,6 +447,8 @@ public class PlayfabConnet : MonoBehaviour
                 gameLeaderboardData.rankLeaderBoards[index].gameVol = item.StatValue;
             }
         }
+
+        MenuManager.instance.OpenMenuId(2);
     }
 
     public void FetchServerTime(Action<GetTimeResult> onSuccess,Action<PlayFabError> onError)

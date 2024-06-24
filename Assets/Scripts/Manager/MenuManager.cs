@@ -79,7 +79,6 @@ public class MenuManager : MonoBehaviour
         {
             nameText.text = PlayfabConnet.instance.PlayerName;
             OrbManager.instance.GetAllOrbDetails();
-            //TODO --Fetching the latest data once user completes the game and then loading the orb screen when leaderboard API success.
             PlayfabConnet.instance.GetPlayerData();
             //OpenMenuId(2);
             StartCoroutine(LoadSelectedItem());

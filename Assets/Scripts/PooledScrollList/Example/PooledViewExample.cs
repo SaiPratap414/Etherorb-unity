@@ -20,7 +20,6 @@ namespace PooledScrollList.Example
 
     public class PooledViewExample : PooledView
     {
-        public Image Image;
         [SerializeField] private GameConfig gameConfig;
         [SerializeField] private TextMeshProUGUI rank;
         [SerializeField] private TextMeshProUGUI playerName;
@@ -42,12 +41,18 @@ namespace PooledScrollList.Example
             gamePlayed.text = leaderboardData.gamePlayed.ToString();
             winRate.text = leaderboardData.winRate.ToString();
 
-            if(leaderboardData.rank <4)
+            if (leaderboardData.rank < 4)
+            {
                 gradientImage.Gradient = GetGradient(leaderboardData.rank);
+                rank.color = GetGradient(leaderboardData.rank).Evaluate(100);
+            }
             gradientImage.gameObject.SetActive(leaderboardData.rank < 4);            
 
         }
+        public void SetMyGradient()
+        {
 
+        }
         private Gradient GetGradient(int rank)
         {
             if (rank == 1)

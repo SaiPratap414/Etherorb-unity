@@ -12,7 +12,6 @@ namespace PooledScrollList.Example
         public PooledScrollRectBase ScrollRectController;
         public InputField InputField;
         public int Count;
-        public List<Color> Colors;
 
         private void Awake()
         {
@@ -21,14 +20,8 @@ namespace PooledScrollList.Example
 
         public override List<PooledData> GetData()
         {
-            //var data = new List<PooledData>(Count);
-
+            //Assigning Data here...
             var data = new List<PooledData>(PlayfabConnet.instance.gameLeaderboardData.rankLeaderBoards.Count);
-
-            //for (var i = 0; i < Count; i++)
-            //{
-            //    data.Add(new PooledDataExample { Color = Colors[Random.Range(0, Colors.Count)], Number = i + 1 });
-            //}
 
             foreach (var item in PlayfabConnet.instance.gameLeaderboardData.rankLeaderBoards)
             {
